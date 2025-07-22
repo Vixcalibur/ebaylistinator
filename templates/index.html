@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+B<!DOCTYPE html>
 <html>
 <head>
-    <title>CSV Generator</title>
+    <title>eBayListinator</title>
 </head>
 <body>
-    <h2>eBay CSV Generator</h2>
+    <h2>eBayListinator</h2>
     <form method="post" action="/generate">
-        <label>Photo URL:</label><br>
+        <label>Photo URL: (Download link for image)</label><br>
         <input type="text" name="photoURL"><br><br>
 
         <label>Short Title:</label><br>
@@ -15,8 +15,10 @@
         <label>Full Title:</label><br>
         <input type="text" name="fullTitle"><br><br>
 
+        <!--
         <label>Listing Type (0 = Coins):</label><br>
         <input type="text" name="listingType" value="0"><br><br>
+        -->
 
         <label>Shipping (0 = Free, 1 = $2.49):</label><br>
         <input type="text" name="SHIPPING" value="0"><br><br>
