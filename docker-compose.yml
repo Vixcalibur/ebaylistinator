@@ -1,0 +1,8 @@
+services:
+  web:
+    build:
+      context: .
+    container_name: ebaylistinator
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
