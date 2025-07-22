@@ -4,5 +4,9 @@ services:
       context: .
     container_name: ebaylistinator
     ports:
-      - "8000:8000"
+      - "8872:8000"
     restart: unless-stopped
+networks:
+  default:
+    name: internal_network
+    external: true
