@@ -1,0 +1,94 @@
+from fastapi import FastAPI, Form, Request
+from fastapi.responses import FileResponse
+from fastapi.templating import Jinja2Templates
+import csv, re
+from pathlib import Path
+from typing import List
+
+app = FastAPI()
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/")
+def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.post("/generate")
+def generate_csv(
+    request: Request,
+    photoURL: str = Form(...),
+    shortTitle: str = Form(...),
+    fullTitle: str = Form(...),
+    listingType: str = Form(...),
+    SHIPPING: str = Form(...),
+    itemSKU: str = Form(...),
+    customLableSKU: str = Form(...),
+    startingSKU: str = Form(...),
+    numberOfListings: str = Form(...)
+):
+    # Convert comma-separated inputs to lists
+    itemSKU = itemSKU.split(",")
+    customLableSKU = customLableSKU.split(",")
+    startingSKU = list(map(int, startingSKU.split(",")))
+    numberOfListings = list(map(int, numberOfListings.split(",")))
+
+    if not (len(itemSKU) == len(customLableSKU) == len(startingSKU) == len(numberOfListings)):
+        raise Exception("All input lists must be of equal length.")
+
+    def clean_filename(filename: str) -> str:
+        return re.sub(r'[\\/:*?"<>|\s]', '_', filename)
+
+    if SHIPPING == "0":
+        shipping = "FREE SHIPPING - (ID: 231299707026)"
+    elif SHIPPING == "1":
+        shipping = "$2.49 Shipping Each item , All items - (ID: 241841053026)"
+    else:
+        raise Exception("Invalid Shipping Option")
+
+    if listingType == "0":
+        headers = ["*Action(SiteID=US|Country=US|Currency=USD|Version=1193)",
+            "Custom Label (SKU)","Category ID,Category Name","Title","Relationship",
+            "Relationship details","Schedule Time","P:EPID","Start price","Quantity",
+            "Item photo URL","VideoID","Condition ID","Description","Format","Duration",
+            "Buy It Now price","Best Offer Enabled","Best Offer Auto Accept Price",
+            "Minimum Best Offer Price","Immediate pay required","Location,Shipping service 1 option",
+            "Shipping service 1 cost","Shipping service 1 priority","Shipping service 2 option",
+            "Shipping service 2 cost","Shipping service 2 priority","Max dispatch time",
+            "Returns accepted option","Returns within option","Refund option","Return shipping cost paid by",
+            "Shipping profile name","Return profile name","Payment profile name","C:Certification",
+            "C:Denomination","C:Strike Type","C:Mint Location","C:Fineness","C:Year","C:KM Number"]
+    else:
+        raise Exception("Only listingType '0' (Coins) is supported.")
+
+    rows = []
+    for i in range(len(customLableSKU)):
+        i_customLableSKU = customLableSKU[i]
+        i_itemSKU = itemSKU[i]
+        for j in range(numberOfListings[i]):
+            num = startingSKU[i] + j
+            suffix = f"{num:03}"
+            j_customLableSKU = i_customLableSKU + suffix
+            title = f"{j_customLableSKU + " " }{i_itemSKU + " " } C: LIVE {shortTitle + " " } RTTV"
+            desc = f"Item Shown on Screen During {" " + fullTitle}"
+            row = ["Add", j_customLableSKU + " " + i_itemSKU, "525", "/Coins & Paper Money/Coins: US/Collections, Lots",
+                   title, "", "", "", "19", "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
+                   "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", shipping,
+                   "No Return Accepted (234360674026) - (ID: 234360674026)",
+                   "Auction - (ID: 231040727026)", "Uncertified", "", "", "", "", "", ""]
+            rows.append(row)
+
+    filename = clean_filename(fullTitle) + ".csv"
+    import io
+    from fastapi.responses import StreamingResponse
+
+    output = io.StringIO()
+    writer = csv.writer(output, lineterminator='\n')
+    writer.writerow(headers)
+    writer.writerows(rows)
+    output.seek(0)
+
+    return StreamingResponse(
+        output,
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
