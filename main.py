@@ -45,8 +45,7 @@ def generate_csv(
         raise Exception("Invalid Shipping Option")
 
     
-    else:
-        raise Exception("Only listingType '0' (Coins) is supported.")
+
 
     rows = []
 
@@ -82,7 +81,7 @@ def generate_csv(
                 rows.append(row)
     # COINS
     # BULLION
-    if listingType == "1":
+    elif listingType == "1":
         headers = ["*Action(SiteID=US|Country=US|Currency=USD|Version=1193)",
             "Custom Label (SKU)","Category ID,Category Name","Title","Relationship",
             "Relationship details","Schedule Time","P:EPID","Start price","Quantity",
@@ -112,7 +111,7 @@ def generate_csv(
                 rows.append(row)    
     # BULLION
     # Jewelry
-    if listingType == "3":
+    elif listingType == "3":
         headers = ["*Action(SiteID=US|Country=US|Currency=USD|Version=1193)",
             "Custom Label (SKU)","Category ID,Category Name","Title","Relationship",
             "Relationship details","Schedule Time","P:EPID","Start price","Quantity",
@@ -149,7 +148,9 @@ def generate_csv(
                        "No Return Accepted (234360674026) - (ID: 234360674026)",
                        "Auction - (ID: 231040727026)","Unbranded","Unisex Adults","Key Ring Watch","","","","","","","","",
                        "","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
-                rows.append(row)    
+                rows.append(row)   
+    else:
+        raise Exception("Only Listing Types '0' (Coins), '1' (Bullion), and '2' (Jewelry) are supported.")
     # JEWELRY
 
     filename = clean_filename(fullTitle) + ".csv"
