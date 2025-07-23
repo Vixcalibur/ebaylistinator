@@ -44,6 +44,14 @@ def generate_csv(
     else:
         raise Exception("Invalid Shipping Option")
 
+    
+    else:
+        raise Exception("Only listingType '0' (Coins) is supported.")
+
+    rows = []
+
+    # COINS
+
     if listingType == "0":
         headers = ["*Action(SiteID=US|Country=US|Currency=USD|Version=1193)",
             "Custom Label (SKU)","Category ID,Category Name","Title","Relationship",
@@ -56,26 +64,93 @@ def generate_csv(
             "Returns accepted option","Returns within option","Refund option","Return shipping cost paid by",
             "Shipping profile name","Return profile name","Payment profile name","C:Certification",
             "C:Denomination","C:Strike Type","C:Mint Location","C:Fineness","C:Year","C:KM Number"]
-    else:
-        raise Exception("Only listingType '0' (Coins) is supported.")
-
-    rows = []
-    for i in range(len(customLableSKU)):
-        i_customLableSKU = customLableSKU[i]
-        i_itemSKU = itemSKU[i]
-        for j in range(numberOfListings[i]):
-            num = startingSKU[i] + j
-            suffix = f"{num:03}"
-            j_customLableSKU = i_customLableSKU + " " + suffix + " " + i_itemSKU
-            title=f"{shortTitle}"
-            listingName = j_customLableSKU + " C: LIVE " + title + " RTTV"
-            desc = f"Item Shown on Screen During {fullTitle}"
-            row = ["Add", j_customLableSKU, "525", "/Coins & Paper Money/Coins: US/Collections, Lots",
-                   listingName, "", "", "", "19", "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
-                   "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", shipping,
-                   "No Return Accepted (234360674026) - (ID: 234360674026)",
-                   "Auction - (ID: 231040727026)", "Uncertified", "", "", "", "", "", ""]
-            rows.append(row)
+        for i in range(len(customLableSKU)):
+            i_customLableSKU = customLableSKU[i]
+            i_itemSKU = itemSKU[i]
+            for j in range(numberOfListings[i]):
+                num = startingSKU[i] + j
+                suffix = f"{num:03}"
+                j_customLableSKU = i_customLableSKU + " " + suffix + " " + i_itemSKU
+                title=f"{shortTitle}"
+                listingName = j_customLableSKU + " C: LIVE " + title + " RTTV"
+                desc = f"Item Shown on Screen During {fullTitle}"
+                row = ["Add", j_customLableSKU, "525", "/Coins & Paper Money/Coins: US/Collections, Lots",
+                       listingName, "", "", "", "19", "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
+                       "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", shipping,
+                       "No Return Accepted (234360674026) - (ID: 234360674026)",
+                       "Auction - (ID: 231040727026)", "Uncertified", "", "", "", "", "", ""]
+                rows.append(row)
+    # COINS
+    # BULLION
+    if listingType == "1":
+        headers = ["*Action(SiteID=US|Country=US|Currency=USD|Version=1193)",
+            "Custom Label (SKU)","Category ID,Category Name","Title","Relationship",
+            "Relationship details","Schedule Time","P:EPID","Start price","Quantity",
+            "Item photo URL","VideoID","Condition ID","Description","Format","Duration",
+            "Buy It Now price","Best Offer Enabled","Best Offer Auto Accept Price",
+            "Minimum Best Offer Price","Immediate pay required","Location,Shipping service 1 option",
+            "Shipping service 1 cost","Shipping service 1 priority","Shipping service 2 option",
+            "Shipping service 2 cost","Shipping service 2 priority","Max dispatch time",
+            "Returns accepted option","Returns within option","Refund option","Return shipping cost paid by",
+            "Shipping profile name","Return profile name","Payment profile name","C:Shape",
+            "C:Precious Metal Content per Unit","C:Brand/Mint","C:Fineness"]
+        for i in range(len(customLableSKU)):
+            i_customLableSKU = customLableSKU[i]
+            i_itemSKU = itemSKU[i]
+            for j in range(numberOfListings[i]):
+                num = startingSKU[i] + j
+                suffix = f"{num:03}"
+                j_customLableSKU = i_customLableSKU + " " + suffix + " " + i_itemSKU
+                title=f"{shortTitle}"
+                listingName = j_customLableSKU + " C: LIVE " + title + " RTTV"
+                desc = f"Item Shown on Screen During {fullTitle}"
+                row = ["Add", j_customLableSKU, "525", "/Coins & Paper Money/Coins: US/Collections, Lots",
+                       listingName, "", "", "", "19", "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
+                       "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", shipping,
+                       "No Return Accepted (234360674026) - (ID: 234360674026)",
+                       "Auction - (ID: 231040727026)","","","",0.999]
+                rows.append(row)    
+    # BULLION
+    # Jewelry
+    if listingType == "3":
+        headers = ["*Action(SiteID=US|Country=US|Currency=USD|Version=1193)",
+            "Custom Label (SKU)","Category ID,Category Name","Title","Relationship",
+            "Relationship details","Schedule Time","P:EPID","Start price","Quantity",
+            "Item photo URL","VideoID","Condition ID","Description","Format","Duration",
+            "Buy It Now price","Best Offer Enabled","Best Offer Auto Accept Price",
+            "Minimum Best Offer Price","Immediate pay required","Location,Shipping service 1 option",
+            "Shipping service 1 cost","Shipping service 1 priority","Shipping service 2 option",
+            "Shipping service 2 cost","Shipping service 2 priority","Max dispatch time",
+            "Returns accepted option","Returns within option","Refund option","Return shipping cost paid by",
+            "Shipping profile name","Return profile name","Payment profile name","C:Brand","C:Department",
+            "C:Type","C:Dial Color","C:Movement","C:Case Color","C:Case Material","C:Features",
+            "C:Year Manufactured","C:Display","C:Model","C:Indices","C:Style","C:With Original Box/Packaging",
+            "C:With Papers","C:Water Resistance","C:Customized","C:MPN","Product Safety Pictograms",
+            "Product Safety Statements","Product Safety Component","Regulatory Document Ids","Manufacturer Name",
+            "Manufacturer AddressLine1","Manufacturer AddressLine2","Manufacturer City","Manufacturer Country",
+            "Manufacturer PostalCode","Manufacturer StateOrProvince","Manufacturer Phone","Manufacturer Email",
+            "Manufacturer ContactURL","Responsible Person 1","Responsible Person 1 Type",
+            "Responsible Person 1 AddressLine1","Responsible Person 1 AddressLine2","Responsible Person 1 City",
+            "Responsible Person 1 Country","Responsible Person 1 PostalCode","Responsible Person 1 StateOrProvince"
+            ",Responsible Person 1 Phone","Responsible Person 1 Email","Responsible Person 1 ContactURL"]
+        for i in range(len(customLableSKU)):
+            i_customLableSKU = customLableSKU[i]
+            i_itemSKU = itemSKU[i]
+            for j in range(numberOfListings[i]):
+                num = startingSKU[i] + j
+                suffix = f"{num:03}"
+                j_customLableSKU = i_customLableSKU + " " + suffix + " " + i_itemSKU
+                title=f"{shortTitle}"
+                listingName = j_customLableSKU + " C: LIVE " + title + " RTTV"
+                desc = f"Item Shown on Screen During {fullTitle}"
+                row = ["Add", j_customLableSKU, "525", "/Coins & Paper Money/Coins: US/Collections, Lots",
+                       listingName, "", "", "", "19", "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
+                       "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", shipping,
+                       "No Return Accepted (234360674026) - (ID: 234360674026)",
+                       "Auction - (ID: 231040727026)","Unbranded","Unisex Adults","Key Ring Watch","","","","","","","","",
+                       "","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
+                rows.append(row)    
+    # JEWELRY
 
     filename = clean_filename(fullTitle) + ".csv"
     import io
