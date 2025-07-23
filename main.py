@@ -72,7 +72,7 @@ def generate_csv(
                 suffix = f"{num:03}"
                 j_customLableSKU = i_customLableSKU + " " + suffix + " " + i_itemSKU
                 title=f"{shortTitle}"
-                price=f"{prices}"
+                price=f"{prices[i]}"
                 listingName = j_customLableSKU + " C: LIVE " + title + " RTTV"
                 desc = f"Item Shown on Screen During {fullTitle}"
                 row = ["Add", j_customLableSKU, "525", "/Coins & Paper Money/Coins: US/Collections, Lots",
@@ -103,7 +103,7 @@ def generate_csv(
                 suffix = f"{num:03}"
                 j_customLableSKU = i_customLableSKU + " " + suffix + " " + i_itemSKU
                 title=f"{shortTitle}"
-                price=f"{prices}"
+                price=f"{prices[i]}"
                 listingName = j_customLableSKU + " C: LIVE " + title + " RTTV"
                 desc = f"Item Shown on Screen During {fullTitle}"
                 row = ["Add", j_customLableSKU, "525", "/Coins & Paper Money/Coins: US/Collections, Lots",
@@ -143,7 +143,7 @@ def generate_csv(
                 suffix = f"{num:03}"
                 j_customLableSKU = i_customLableSKU + " " + suffix + " " + i_itemSKU
                 title=f"{shortTitle}"
-                price=f"{prices}"
+                price=f"{prices[i]}"
                 listingName = j_customLableSKU + " C: LIVE " + title + " RTTV"
                 desc = f"Item Shown on Screen During {fullTitle}"
                 row = ["Add", j_customLableSKU, "525", "/Coins & Paper Money/Coins: US/Collections, Lots",
