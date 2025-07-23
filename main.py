@@ -66,11 +66,12 @@ def generate_csv(
         for j in range(numberOfListings[i]):
             num = startingSKU[i] + j
             suffix = f"{num:03}"
-            j_customLableSKU = i_customLableSKU + suffix
-            title = f"{j_customLableSKU} {i_itemSKU} C: LIVE {shortTitle} RTTV"
+            j_customLableSKU = i_customLableSKU + " " + suffix + " " + i_itemSKU
+            title=f"{shortTitle}"
+            listingName = j_customLableSKU + " C: LIVE " + title + " RTTV"
             desc = f"Item Shown on Screen During {fullTitle}"
-            row = ["Add", j_customLableSKU + " " + i_itemSKU, "525", "/Coins & Paper Money/Coins: US/Collections, Lots",
-                   title, "", "", "", "19", "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
+            row = ["Add", j_customLableSKU, "525", "/Coins & Paper Money/Coins: US/Collections, Lots",
+                   listingName, "", "", "", "19", "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
                    "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", shipping,
                    "No Return Accepted (234360674026) - (ID: 234360674026)",
                    "Auction - (ID: 231040727026)", "Uncertified", "", "", "", "", "", ""]
