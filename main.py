@@ -107,7 +107,7 @@ def generate_csv(
                 price=f"{prices[i]}"
                 listingName = j_customLableSKU + " C: LIVE " + title + " RTTV"
                 desc = f"Item Shown on Screen During {fullTitle}"
-                row = ["Add", j_customLableSKU, "260326", "/Jewelry & Watches/Watches, Parts & Accessories/Watches/Other Watches",
+                row = ["Add", j_customLableSKU, "39489", "/Coins & Paper Money/Bullion/Silver/Bars & Rounds",
                        listingName, "", "", "", "", price, "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
                        "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", "", shipping,
                        "No Return Accepted (234360674026) - (ID: 234360674026)",
@@ -147,7 +147,7 @@ def generate_csv(
                 price=f"{prices[i]}"
                 listingName = j_customLableSKU + " C: LIVE " + title + " RTTV"
                 desc = f"Item Shown on Screen During {fullTitle}"
-                row = ["Add", j_customLableSKU, "525", "/Coins & Paper Money/Coins: US/Collections, Lots",
+                row = ["Add", j_customLableSKU, "260326", "/Jewelry & Watches/Watches, Parts & Accessories/Watches/Other Watches",
                        listingName, "", "", "", "", prices, "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
                        "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", "", shipping,
                        "No Return Accepted (234360674026) - (ID: 234360674026)",
