@@ -48,6 +48,17 @@
         <input type="text" name="numberOfListings"><br><br>
 
         <input type="submit" value="Generate CSV">
+
+          <!-- Right: Column K Extractor -->
+        <div style="flex: 1;">
+          <h3>Extract Listing IDs from Ebay Output</h3>
+          <form method="post" action="/extract-k" enctype="multipart/form-data">
+            <label>Select CSV File:</label><br>
+            <input type="file" name="file" accept=".csv"><br><br>
+            <input type="submit" value="Extract Column K">
+          </form>
+        </div>
+        
     </form>
 </body>
 </html>
