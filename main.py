@@ -172,22 +172,5 @@ def generate_csv(
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
 
-@app.post("/extract-k")
-async def extract_column_k(file: UploadFile = File(...)):
-    if not file.filename.endswith('.csv'):
-        return PlainTextResponse("Please upload a valid CSV file.", status_code=400)
-
-    contents = await file.read()
-    decoded = contents.decode('utf-8')
-    reader = csv.reader(io.StringIO(decoded))
-
-    column_k = []
-    for row in reader:
-        if len(row) > 10:  # index 10 = column K
-            column_k.append(row[10])
-
-    result = "\n".join(column_k)
-    return PlainTextResponse(result, media_type="text/plain")
-
     )
 
