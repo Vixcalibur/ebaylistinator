@@ -30,7 +30,7 @@ def generate_csv(
     customLableSKU = customLableSKU.split(",")
     startingSKU = list(map(int, startingSKU.split(",")))
     numberOfListings = list(map(int, numberOfListings.split(",")))
-    prices = list(map(int, numberOfListings.split(",")))
+    prices = list(map(int, prices.split(",")))
 
     if not (len(itemSKU) == len(customLableSKU) == len(startingSKU) == len(numberOfListings)):
         raise Exception("All input lists must be of equal length.")
