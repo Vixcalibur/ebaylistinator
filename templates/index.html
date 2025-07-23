@@ -5,35 +5,47 @@
 </head>
 <body>
     <h2>eBayListinator</h2>
+    <h3>ERROR LOGS COMING SOON</h3>
     <form method="post" action="/generate">
-        <label>Photo URL: (Download link for image)</label><br>
-        <input type="text" name="photoURL"><br><br>
 
-        <label>Short Title:</label><br>
+        <b>Globle Listing Settings: ALL ARE REQUIRED</b>
+        
+        <label>*Short Title:</label><br>
         <input type="text" name="shortTitle"><br><br>
 
-        <label>Full Title:</label><br>
+        <label>*Full Title:</label><br>
         <input type="text" name="fullTitle"><br><br>
 
-        <label>Listing Type (0 = Coins, 1 = Bullion, 2 = Jewelry):</label><br>
+        <label>*Photo URL: (Download link for image)</label><br>
+        <input type="text" name="photoURL"><br><br>
+
+        <label>*Listing Type (0 = Coins, 1 = Bullion, 2 = Jewelry):</label><br>
         <input type="text" name="listingType" value="0"><br><br>
 
-        <label>Shipping (0 = Free, 1 = $2.49):</label><br>
+        <label>*Shipping (0 = Free, 1 = $2.49):</label><br>
         <input type="text" name="SHIPPING" value="0"><br><br>
 
-        <label>Item SKU (comma-separated):</label><br>
+        <b>------------------------------------------------------</b>
+        <b>Individual Listing Group Settings: ALL BOXES MUST HAVE THE SAME NUMBER OF VALUES: * Are required</b>
+
+        <label>Item SKU (comma-separated): For many listing types with no Item SKU put string of commas:</label><br>
+        <label>EXAMPLES: ",,,," or ",,10a,10b" or "1a,2b,3c"</label><br>
         <input type="text" name="itemSKU"><br><br>
 
-        <label>Custom Label SKU (comma-separated):</label><br>
+        <label>*Custom Label SKU (comma-separated):</label><br>
+        <label>EXAMPLES: "AAA,BAA,CAA,CAA," or "AAA,AAA,AAA"</label><br>
         <input type="text" name="customLableSKU"><br><br>
 
-        <label>Item SKU (comma-separated):</label><br>
+        <label>*Price (comma-separated):</label><br>
+        <label>EXAMPLES: "10,10,20,15," or "10,15,1000"</label><br>
         <input type="text" name="prices"><br><br>
 
-        <label>Starting SKU (comma-separated):</label><br>
+        <label>*Starting SKU (comma-separated):</label><br>
+        <label>EXAMPLES: "1,51,24,16," or "1,51,81"</label><br>
         <input type="text" name="startingSKU"><br><br>
 
-        <label>Number of Listings (comma-separated):</label><br>
+        <label>*Number of Listings (comma-separated):</label><br>
+        <label>EXAMPLES: "50,40,27,89," or "50,30,40"</label><br>
         <input type="text" name="numberOfListings"><br><br>
 
         <input type="submit" value="Generate CSV">
