@@ -59,7 +59,7 @@ def generate_csv(
             "Relationship details","Schedule Time","P:EPID","Start price","Quantity",
             "Item photo URL","VideoID","Condition ID","Description","Format","Duration",
             "Buy It Now price","Best Offer Enabled","Best Offer Auto Accept Price",
-            "Minimum Best Offer Price","Immediate pay required","Location,Shipping service 1 option",
+            "Minimum Best Offer Price","Immediate pay required","Location","Shipping service 1 option",
             "Shipping service 1 cost","Shipping service 1 priority","Shipping service 2 option",
             "Shipping service 2 cost","Shipping service 2 priority","Max dispatch time",
             "Returns accepted option","Returns within option","Refund option","Return shipping cost paid by",
@@ -78,7 +78,7 @@ def generate_csv(
                 desc = f"Item Shown on Screen During {fullTitle}"
                 row = ["Add", j_customLableSKU, "525", "/Coins & Paper Money/Coins: US/Collections, Lots",
                        listingName, "", "", "", "", price, "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
-                       "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", shipping,
+                       "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", "", shipping,
                        "No Return Accepted (234360674026) - (ID: 234360674026)",
                        "Auction - (ID: 231040727026)", "Uncertified", "", "", "", "", "", ""]
                 rows.append(row)
@@ -90,7 +90,7 @@ def generate_csv(
             "Relationship details","Schedule Time","P:EPID","Start price","Quantity",
             "Item photo URL","VideoID","Condition ID","Description","Format","Duration",
             "Buy It Now price","Best Offer Enabled","Best Offer Auto Accept Price",
-            "Minimum Best Offer Price","Immediate pay required","Location,Shipping service 1 option",
+            "Minimum Best Offer Price","Immediate pay required","Location","Shipping service 1 option",
             "Shipping service 1 cost","Shipping service 1 priority","Shipping service 2 option",
             "Shipping service 2 cost","Shipping service 2 priority","Max dispatch time",
             "Returns accepted option","Returns within option","Refund option","Return shipping cost paid by",
@@ -109,7 +109,7 @@ def generate_csv(
                 desc = f"Item Shown on Screen During {fullTitle}"
                 row = ["Add", j_customLableSKU, "525", "/Coins & Paper Money/Coins: US/Collections, Lots",
                        listingName, "", "", "", "", price, "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
-                       "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", shipping,
+                       "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", "", shipping,
                        "No Return Accepted (234360674026) - (ID: 234360674026)",
                        "Auction - (ID: 231040727026)","","","",0.999]
                 rows.append(row)    
@@ -121,7 +121,7 @@ def generate_csv(
             "Relationship details","Schedule Time","P:EPID","Start price","Quantity",
             "Item photo URL","VideoID","Condition ID","Description","Format","Duration",
             "Buy It Now price","Best Offer Enabled","Best Offer Auto Accept Price",
-            "Minimum Best Offer Price","Immediate pay required","Location,Shipping service 1 option",
+            "Minimum Best Offer Price","Immediate pay required","Location","Shipping service 1 option",
             "Shipping service 1 cost","Shipping service 1 priority","Shipping service 2 option",
             "Shipping service 2 cost","Shipping service 2 priority","Max dispatch time",
             "Returns accepted option","Returns within option","Refund option","Return shipping cost paid by",
@@ -149,7 +149,7 @@ def generate_csv(
                 desc = f"Item Shown on Screen During {fullTitle}"
                 row = ["Add", j_customLableSKU, "525", "/Coins & Paper Money/Coins: US/Collections, Lots",
                        listingName, "", "", "", "", prices, "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
-                       "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", shipping,
+                       "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", "", shipping,
                        "No Return Accepted (234360674026) - (ID: 234360674026)",
                        "Auction - (ID: 231040727026)","Unbranded","Unisex Adults","Key Ring Watch","","","","","","","","",
                        "","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
