@@ -55,7 +55,7 @@ def generate_csv(
 
     if listingType == "0":
         headers = ["*Action(SiteID=US|Country=US|Currency=USD|Version=1193)",
-            "Custom Label (SKU)","Category ID,Category Name","Title","Relationship",
+            "Custom Label (SKU)","Category ID","Category Name","Title","Relationship",
             "Relationship details","Schedule Time","P:EPID","Start price","Quantity",
             "Item photo URL","VideoID","Condition ID","Description","Format","Duration",
             "Buy It Now price","Best Offer Enabled","Best Offer Auto Accept Price",
@@ -86,7 +86,7 @@ def generate_csv(
     # BULLION
     elif listingType == "1":
         headers = ["*Action(SiteID=US|Country=US|Currency=USD|Version=1193)",
-            "Custom Label (SKU)","Category ID,Category Name","Title","Relationship",
+            "Custom Label (SKU)","Category ID","Category Name","Title","Relationship",
             "Relationship details","Schedule Time","P:EPID","Start price","Quantity",
             "Item photo URL","VideoID","Condition ID","Description","Format","Duration",
             "Buy It Now price","Best Offer Enabled","Best Offer Auto Accept Price",
@@ -117,7 +117,7 @@ def generate_csv(
     # Jewelry
     elif listingType == "3":
         headers = ["*Action(SiteID=US|Country=US|Currency=USD|Version=1193)",
-            "Custom Label (SKU)","Category ID,Category Name","Title","Relationship",
+            "Custom Label (SKU)","Category ID","Category Name","Title","Relationship",
             "Relationship details","Schedule Time","P:EPID","Start price","Quantity",
             "Item photo URL","VideoID","Condition ID","Description","Format","Duration",
             "Buy It Now price","Best Offer Enabled","Best Offer Auto Accept Price",
