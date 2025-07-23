@@ -24,6 +24,7 @@ def generate_csv(
     customLableSKU: str = Form(...),
     startingSKU: str = Form(...),
     numberOfListings: str = Form(...)
+    prices: str = Form(...)
 ):
     # Convert comma-separated inputs to lists
     itemSKU = itemSKU.split(",")
