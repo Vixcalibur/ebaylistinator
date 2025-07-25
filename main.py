@@ -20,11 +20,11 @@ def generate_csv(
     fullTitle: str = Form(...),
     listingType: str = Form(...),
     SHIPPING: str = Form(...),
-    itemSKU: str = Form(...),
-    customLableSKU: str = Form(...),
-    startingSKU: str = Form(...),
-    numberOfListings: str = Form(...),
-    prices: str = Form(...)
+    itemSKU: List[str] = Form(...),
+    customLableSKU: List[str] = Form(...),
+    startingSKU: List[str] = Form(...),
+    numberOfListings: List[str] = Form(...),
+    prices: List[str] = Form(...)
 ):
     # Convert comma-separated inputs to lists
     itemSKU = itemSKU.split(",")
@@ -174,4 +174,7 @@ def generate_csv(
         headers={"Content-Disposition": f"attachment; filename={filename}"}
 
     )
+
+
+
 
