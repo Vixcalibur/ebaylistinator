@@ -81,3 +81,18 @@
     </form>
 </body>
 </html>
+
+
+<script>
+function addRow() {
+  const table = document.getElementById('input-grid').getElementsByTagName('tbody')[0];
+  const newRow = table.rows[0].cloneNode(true);
+
+  Array.from(newRow.querySelectorAll('input')).forEach(input => {
+    input.value = '';
+  });
+
+  table.appendChild(newRow);
+}
+</script>
+
