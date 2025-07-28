@@ -22,10 +22,13 @@ def generate_csv(
     SHIPPING: str = Form(...),
     itemSKU: List[str] = Form(...),
     customLabelSKU: List[str] = Form(...),
-    startingSKU: List[str] = Form(...),
-    numberOfListings: List[str] = Form(...),
-    prices: List[str] = Form(...)
+    startingSKU: List[int] = Form(...),
+    numberOfListings: List[int] = Form(...),
+    prices: List[int] = Form(...)
 ):
+
+    numberOfListings = [int(x) for x in numberOfListings]
+    numberOfListings = [int(x) for x in numberOfListings]
 
     if not (len(itemSKU) == len(customLabelSKU) == len(startingSKU) == len(numberOfListings)):
         raise Exception("All input lists must be of equal length.")
