@@ -141,6 +141,19 @@
         <h3>Result</h3>
         <textarea readonly>{{ '\n'.join(column_data) }}</textarea>
         {% endif %}
+
+<hr>
+<h2>SKU List Generator</h2>
+<form action="/generate-sku-list" method="post">
+  <label for="first_sku">First SKU (e.g., AAA):</label><br>
+  <input type="text" id="first_sku" name="first_sku" maxlength="3" required><br><br>
+
+  <label for="last_sku">Last SKU (e.g., ZZZ):</label><br>
+  <input type="text" id="last_sku" name="last_sku" maxlength="3" required><br><br>
+
+  <button type="submit">Generate SKU List</button>
+</form>
+        
     </div>
 
 </div>
