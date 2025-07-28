@@ -180,15 +180,15 @@ async def extract_column(file: UploadFile = File(...)):
     reader = csv.reader(io.StringIO(decoded))
 
     # Extract column K (index 10) from each row, skipping header
-    column_k = []
+    column_j = []
     for i, row in enumerate(reader):
-        if len(row) > 10:  # index 10 = column K
-            column_k.append(row[10])
+        if len(row) > 9:  # index 10 = column K
+            column_j.append(row[9])
         else:
-            column_k.append("")
+            column_j.append("")
 
     # Format as a copy-paste list
-    joined = "\n".join(column_k)
+    joined = "\n".join(column_j)
 
     return f"""
     <h2>Extracted Column K</h2>
