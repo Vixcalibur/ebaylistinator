@@ -170,6 +170,18 @@ function addRow() {
 
     table.appendChild(newRow);
 }
+
+function removeRow(button) {
+  const tableBody = document.getElementById('input-grid').getElementsByTagName('tbody')[0];
+  const row = button.closest('tr');
+  
+  // Only remove if there's more than one row
+  if (tableBody.rows.length > 1) {
+    row.remove();
+  } else {
+    alert("At least one row is required.");
+  }
+}
 </script>
 
 </body>
