@@ -26,12 +26,6 @@ def generate_csv(
     numberOfListings: List[str] = Form(...),
     prices: List[str] = Form(...)
 ):
-    # Convert comma-separated inputs to lists
-    itemSKU = itemSKU.split(",")
-    customLabelSKU = customLabelSKU.split(",")
-    startingSKU = list(map(int, startingSKU.split(",")))
-    numberOfListings = list(map(int, numberOfListings.split(",")))
-    prices = list(map(int, prices.split(",")))
 
     if not (len(itemSKU) == len(customLabelSKU) == len(startingSKU) == len(numberOfListings)):
         raise Exception("All input lists must be of equal length.")
