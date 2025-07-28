@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Form, Request, UploadFile, File
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
 import csv, re, io
 from pathlib import Path
@@ -196,6 +196,25 @@ async def extract_column(file: UploadFile = File(...)):
     <br><a href="/">Back</a>
     """
 
+@app.post("/generate-sku-list")
+def generate_sku_list(first_sku: str = Form(...), last_sku: str = Form(...)):
+    first_sku = first_sku.upper()
+    last_sku = last_sku.upper()
 
+    codes = []
+    for first in range(ord(first_sku[2]), ord(last_sku[2]) + 1):
+        for second in range(ord(first_sku[1]), ord(last_sku[1]) + 1):
+            for third in range(ord(first_sku[0]), ord(last_sku[0]) + 1):
+                prefix = chr(third) + chr(second) + chr(first) + " "
+                for number in range(1, 281):
+                    codes.append(f"{prefix}{number:03}")
+
+    title = codes[0] + " - " + codes[-1]
+    file_content = title + "\n" + "\n".join(codes)
+
+    # Return the result as downloadable .txt
+    return PlainTextResponse(file_content, headers={
+        "Content-Disposition": f"attachment; filename={title}.txt"
+    })
 
 
