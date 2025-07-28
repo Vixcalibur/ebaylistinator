@@ -2,96 +2,142 @@
 <html>
 <head>
     <title>eBayListinator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .form-section {
+            width: 52%;
+        }
+
+        .extractor-section {
+            width: 45%;
+            border-left: 1px solid #ccc;
+            padding-left: 20px;
+        }
+
+        table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            border: 1px solid #999;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px;
+        }
+    </style>
 </head>
 <body>
-    <h2>eBayListinator</h2>
-    <h3>ERROR LOGS COMING SOON</h3>
-    <form method="post" action="/generate">
 
-        <label><b>Global Listing Settings: ALL ARE REQUIRED</b></label><br><br>
-        
-<table border="1" cellpadding="6">
-    <thead>
-      <tr>
-        <th>Custom Label SKU</th>
-        <th>*Item SKU</th>
-        <th>*Prices</th>
-        <th>*Starting SKU</th>
-        <th>*Number of Listings</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Row 1 -->
-      <tr>
-        <th>10a</th>
-        <th>AAA</th>
-        <th>19</th>
-        <th>1</th>
-        <th>40</th>
-      </tr>
-      <!-- Row 2 -->
-      <tr>
-        <th>20b</th>
-        <th>AAA</th>
-        <th>210</th>
-        <th>41</th>
-        <th>80</th>
-      </tr>
-      <!-- Add more rows as needed -->
-    </tbody>
-  </table>
+<div class="container">
 
-        <table border="1" id="input-grid">
-          <thead>
-            <tr>
-              <th>Item SKU</th>
-              <th>*Custom Label SKU</th>
-              <th>*Prices</th>
-              <th>*Starting SKU</th>
-              <th>*Number of Listings</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Initial Row -->
-            <tr>
-              <td><input type="text" name="itemSKU"></td>
-              <td><input type="text" name="customLabelSKU"></td>
-              <td><input type="text" name="prices"></td>
-              <td><input type="number" name="startingSKU"></td>
-              <td><input type="number" name="numberOfListings"></td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- LEFT SIDE FORM -->
+    <div class="form-section">
+        <h2>eBayListinator</h2>
+        <h3>ERROR LOGS COMING SOON</h3>
 
-<button type="button" onclick="addRow()">Add Row</button>
+        <form method="post" action="/generate">
+            <label><b>Global Listing Settings: ALL ARE REQUIRED</b></label><br><br>
 
-        <input type="submit" value="Generate CSV">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Custom Label SKU</th>
+                        <th>*Item SKU</th>
+                        <th>*Prices</th>
+                        <th>*Starting SKU</th>
+                        <th>*Number of Listings</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>10a</td>
+                        <td>AAA</td>
+                        <td>19</td>
+                        <td>1</td>
+                        <td>40</td>
+                    </tr>
+                    <tr>
+                        <td>20b</td>
+                        <td>AAA</td>
+                        <td>210</td>
+                        <td>41</td>
+                        <td>80</td>
+                    </tr>
+                </tbody>
+            </table>
 
-          <!-- Right: Column K Extractor 
-        <div style="flex: 1;">
-          <h3>Extract Listing IDs from Ebay Output</h3>
-          <form method="post" action="/extract-k" enctype="multipart/form-data">
-            <label>Select CSV File:</label><br>
-            <input type="file" name="file" accept=".csv"><br><br>
-            <input type="submit" value="Extract Column K">
-          </form>
-        </div>
-        -->
-    </form>
-</body>
-</html>
+            <table id="input-grid">
+                <thead>
+                    <tr>
+                        <th>Item SKU</th>
+                        <th>*Custom Label SKU</th>
+                        <th>*Prices</th>
+                        <th>*Starting SKU</th>
+                        <th>*Number of Listings</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" name="itemSKU"></td>
+                        <td><input type="text" name="customLabelSKU"></td>
+                        <td><input type="text" name="prices"></td>
+                        <td><input type="number" name="startingSKU"></td>
+                        <td><input type="number" name="numberOfListings"></td>
+                    </tr>
+                </tbody>
+            </table>
 
+            <button type="button" onclick="addRow()">Add Row</button>
+            <input type="submit" value="Generate CSV">
+        </form>
+    </div>
+
+    <!-- RIGHT SIDE EXTRACTOR -->
+    <div class="extractor-section">
+        <h2>Extract Column K from CSV</h2>
+        <form action="/extract-column" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv" required><br><br>
+            <button type="submit">Upload & Extract</button>
+        </form>
+
+        {% if column_data %}
+        <h3>Result</h3>
+        <textarea readonly>{{ '\n'.join(column_data) }}</textarea>
+        {% endif %}
+    </div>
+
+</div>
 
 <script>
 function addRow() {
-  const table = document.getElementById('input-grid').getElementsByTagName('tbody')[0];
-  const newRow = table.rows[0].cloneNode(true);
+    const table = document.getElementById('input-grid').getElementsByTagName('tbody')[0];
+    const newRow = table.rows[0].cloneNode(true);
 
-  Array.from(newRow.querySelectorAll('input')).forEach(input => {
-    input.value = '';
-  });
+    Array.from(newRow.querySelectorAll('input')).forEach(input => {
+        input.value = '';
+    });
 
-  table.appendChild(newRow);
+    table.appendChild(newRow);
 }
 </script>
 
+</body>
+</html>
