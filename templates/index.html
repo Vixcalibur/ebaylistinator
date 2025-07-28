@@ -56,6 +56,25 @@
         <form method="post" action="/generate">
             <label><b>Global Listing Settings: ALL ARE REQUIRED</b></label><br><br>
 
+            <label>Photo URL (DOWNLOAD LINK TO THUMBNAIL):</label><br>
+            <input type="text" name="photoURL" required><br><br>
+
+            <label>Short Title (SHORT TITLE FOR LISTING NAME):</label><br>
+            <input type="text" name="shortTitle" required><br><br>
+
+            <label>Full Title (FOR LISTING DESCRIPTION):</label><br>
+            <input type="text" name="fullTitle" required><br><br>
+
+            <label>Listing Type (Coins = 0, Bullion = 1, Jewelry = 2):</label><br>
+            <input type="text" name="listingType" required><br><br>
+
+            <label>Shipping (FREE = $0, $2.49 = 1):</label><br>
+            <input type="text" name="SHIPPING" required><br><br>
+
+            
+            <label><b>INDIVIDUAL LISTING GROUPS:  * ARE REQUIRED</b></label><br><br>
+
+
             <table>
                 <thead>
                     <tr>
