@@ -1,7 +1,7 @@
-from fastapi import FastAPI, Form, Request
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Form, Request, UploadFile, File
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
-import csv, re
+import csv, re, io
 from pathlib import Path
 from typing import List
 
@@ -171,6 +171,30 @@ def generate_csv(
         headers={"Content-Disposition": f"attachment; filename={filename}"}
 
     )
+
+
+@app.post("/extract-column", response_class=HTMLResponse)
+async def extract_column(file: UploadFile = File(...)):
+    contents = await file.read()
+    decoded = contents.decode("utf-8")
+    reader = csv.reader(io.StringIO(decoded))
+
+    # Extract column K (index 10) from each row, skipping header
+    column_k = []
+    for i, row in enumerate(reader):
+        if len(row) > 10:  # index 10 = column K
+            column_k.append(row[10])
+        else:
+            column_k.append("")
+
+    # Format as a copy-paste list
+    joined = "\n".join(column_k)
+
+    return f"""
+    <h2>Extracted Column K</h2>
+    <textarea style='width:100%; height:300px'>{joined}</textarea>
+    <br><a href="/">Back</a>
+    """
 
 
 
