@@ -21,19 +21,19 @@ def generate_csv(
     listingType: str = Form(...),
     SHIPPING: str = Form(...),
     itemSKU: List[str] = Form(...),
-    customLableSKU: List[str] = Form(...),
+    customLabelSKU: List[str] = Form(...),
     startingSKU: List[str] = Form(...),
     numberOfListings: List[str] = Form(...),
     prices: List[str] = Form(...)
 ):
     # Convert comma-separated inputs to lists
     itemSKU = itemSKU.split(",")
-    customLableSKU = customLableSKU.split(",")
+    customLabelSKU = customLabelSKU.split(",")
     startingSKU = list(map(int, startingSKU.split(",")))
     numberOfListings = list(map(int, numberOfListings.split(",")))
     prices = list(map(int, prices.split(",")))
 
-    if not (len(itemSKU) == len(customLableSKU) == len(startingSKU) == len(numberOfListings)):
+    if not (len(itemSKU) == len(customLabelSKU) == len(startingSKU) == len(numberOfListings)):
         raise Exception("All input lists must be of equal length.")
 
     def clean_filename(filename: str) -> str:
@@ -65,18 +65,18 @@ def generate_csv(
             "Returns accepted option","Returns within option","Refund option","Return shipping cost paid by",
             "Shipping profile name","Return profile name","Payment profile name","C:Certification",
             "C:Denomination","C:Strike Type","C:Mint Location","C:Fineness","C:Year","C:KM Number"]
-        for i in range(len(customLableSKU)):
-            i_customLableSKU = customLableSKU[i]
+        for i in range(len(customLabelSKU)):
+            i_customLabelSKU = customLabelSKU[i]
             i_itemSKU = itemSKU[i]
             for j in range(numberOfListings[i]):
                 num = startingSKU[i] + j
                 suffix = f"{num:03}"
-                j_customLableSKU = i_customLableSKU + " " + suffix + " " + i_itemSKU
+                j_customLabelSKU = i_customLabelSKU + " " + suffix + " " + i_itemSKU
                 title=f"{shortTitle}"
                 price=f"{prices[i]}"
-                listingName = j_customLableSKU + " C: LIVE " + title + " RTTV"
+                listingName = j_customLabelSKU + " C: LIVE " + title + " RTTV"
                 desc = f"Item Shown on Screen During {fullTitle}"
-                row = ["Add", j_customLableSKU, "39489", "/Coins & Paper Money/Bullion/Silver/Bars & Rounds",
+                row = ["Add", j_customLabelSKU, "39489", "/Coins & Paper Money/Bullion/Silver/Bars & Rounds",
                        listingName, "", "", "", "", price, "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
                        "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", "", shipping,
                        "No Return Accepted (234360674026) - (ID: 234360674026)",
@@ -96,18 +96,18 @@ def generate_csv(
             "Returns accepted option","Returns within option","Refund option","Return shipping cost paid by",
             "Shipping profile name","Return profile name","Payment profile name","C:Shape",
             "C:Precious Metal Content per Unit","C:Brand/Mint","C:Fineness"]
-        for i in range(len(customLableSKU)):
-            i_customLableSKU = customLableSKU[i]
+        for i in range(len(customLabelSKU)):
+            i_customLabelSKU = customLabelSKU[i]
             i_itemSKU = itemSKU[i]
             for j in range(numberOfListings[i]):
                 num = startingSKU[i] + j
                 suffix = f"{num:03}"
-                j_customLableSKU = i_customLableSKU + " " + suffix + " " + i_itemSKU
+                j_customLabelSKU = i_customLabelSKU + " " + suffix + " " + i_itemSKU
                 title=f"{shortTitle}"
                 price=f"{prices[i]}"
-                listingName = j_customLableSKU + " C: LIVE " + title + " RTTV"
+                listingName = j_customLabelSKU + " C: LIVE " + title + " RTTV"
                 desc = f"Item Shown on Screen During {fullTitle}"
-                row = ["Add", j_customLableSKU, "39489", "/Coins & Paper Money/Bullion/Silver/Bars & Rounds",
+                row = ["Add", j_customLabelSKU, "39489", "/Coins & Paper Money/Bullion/Silver/Bars & Rounds",
                        listingName, "", "", "", "", price, "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
                        "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", "", shipping,
                        "No Return Accepted (234360674026) - (ID: 234360674026)",
@@ -136,18 +136,18 @@ def generate_csv(
             "Responsible Person 1 AddressLine1","Responsible Person 1 AddressLine2","Responsible Person 1 City",
             "Responsible Person 1 Country","Responsible Person 1 PostalCode","Responsible Person 1 StateOrProvince"
             ",Responsible Person 1 Phone","Responsible Person 1 Email","Responsible Person 1 ContactURL"]
-        for i in range(len(customLableSKU)):
-            i_customLableSKU = customLableSKU[i]
+        for i in range(len(customLabelSKU)):
+            i_customLabelSKU = customLabelSKU[i]
             i_itemSKU = itemSKU[i]
             for j in range(numberOfListings[i]):
                 num = startingSKU[i] + j
                 suffix = f"{num:03}"
-                j_customLableSKU = i_customLableSKU + " " + suffix + " " + i_itemSKU
+                j_customLabelSKU = i_customLabelSKU + " " + suffix + " " + i_itemSKU
                 title=f"{shortTitle}"
                 price=f"{prices[i]}"
-                listingName = j_customLableSKU + " C: LIVE " + title + " RTTV"
+                listingName = j_customLabelSKU + " C: LIVE " + title + " RTTV"
                 desc = f"Item Shown on Screen During {fullTitle}"
-                row = ["Add", j_customLableSKU, "260326", "/Jewelry & Watches/Watches, Parts & Accessories/Watches/Other Watches",
+                row = ["Add", j_customLabelSKU, "260326", "/Jewelry & Watches/Watches, Parts & Accessories/Watches/Other Watches",
                        listingName, "", "", "", "", prices, "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
                        "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", "", shipping,
                        "No Return Accepted (234360674026) - (ID: 234360674026)",
