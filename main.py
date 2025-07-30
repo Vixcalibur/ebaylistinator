@@ -112,7 +112,7 @@ def generate_csv(
                 rows.append(row)    
     # BULLION
     # Jewelry
-    elif listingType == "3":
+    elif listingType == "2":
         headers = ["*Action(SiteID=US|Country=US|Currency=USD|Version=1193)",
             "Custom Label (SKU)","Category ID","Category Name","Title","Relationship",
             "Relationship details","Schedule Time","P:EPID","Start price","Quantity",
