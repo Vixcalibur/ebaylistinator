@@ -145,7 +145,7 @@ def generate_csv(
                 listingName = j_customLabelSKU + " C: LIVE " + title + " RTTV"
                 desc = f"Item Shown on Screen During {fullTitle}"
                 row = ["Add", j_customLabelSKU, "260326", "/Jewelry & Watches/Watches, Parts & Accessories/Watches/Other Watches",
-                       listingName, "", "", "", "", prices, "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
+                       listingName, "", "", "", "", price, "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
                        "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", "", shipping,
                        "No Return Accepted (234360674026) - (ID: 234360674026)",
                        "Auction - (ID: 231040727026)","Unbranded","Unisex Adults","Key Ring Watch","","","","","","","","",
