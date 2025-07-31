@@ -63,7 +63,11 @@
             <input type="text" name="fullTitle" required><br><br>
             
             <label>Photo URL (DOWNLOAD LINK TO THUMBNAIL):</label><br>
-            <input type="text" name="photoURL" required><br><br>
+            <input type="text" id="img-url" name="photoURL" oninput="updateImage()" required><br>
+            <label>THUMBNAIL PREVEIW:</label>
+            <img id="preview" src="" alt="Image Preview" style="max-width: 400px; display: none; border: 1px solid #ccc;"><br><br>
+
+            
 
             <label>Listing Type (Coins = 0, Bullion = 1, Jewelry = 2):</label><br>
             <input type="text" name="listingType" required><br><br>
@@ -180,6 +184,18 @@ function removeRow(button) {
     row.remove();
   } else {
     alert("At least one row is required.");
+  }
+}
+
+function updateImage() {
+  const url = document.getElementById('img-url').value;
+  const img = document.getElementById('preview');
+
+  if (url.trim() !== "") {
+    img.src = url;
+    img.style.display = 'block';
+  } else {
+    img.style.display = 'none';
   }
 }
 </script>
