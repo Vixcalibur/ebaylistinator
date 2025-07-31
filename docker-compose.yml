@@ -1,7 +1,6 @@
 services:
   web:
-    build:
-      context: .
+    image: ghcr.io/vixcalibur/ebaylistinator:latest
     container_name: ebaylistinator
     ports:
       - "8872:8000"
