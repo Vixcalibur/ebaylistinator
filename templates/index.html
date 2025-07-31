@@ -51,7 +51,6 @@
     <!-- LEFT SIDE FORM -->
     <div class="form-section">
         <h2>eBayListinator</h2>
-        <h3>ERROR LOGS COMING SOON</h3>
 
         <form method="post" action="/generate">
             <label><b>Global Listing Settings: ALL ARE REQUIRED</b></label><br><br>
@@ -162,7 +161,12 @@
     </div>
 
 </div>
-
+    
+<div>
+    <h3>Log Output</h3>
+    <pre id="log-output" style="background:#f1f1f1; padding:10px; border:1px solid #ccc; max-height:300px; overflow-y:auto;"></pre>
+</div>
+    
 <script>
 function addRow() {
     const table = document.getElementById('input-grid').getElementsByTagName('tbody')[0];
@@ -198,6 +202,13 @@ function updateImage() {
     img.style.display = 'none';
   }
 }
+
+function logMessage(message) {
+  const logBox = document.getElementById('log-output');
+  logBox.textContent += message + '\n';
+  logBox.scrollTop = logBox.scrollHeight; // auto-scroll to bottom
+}
+    
 </script>
 
 </body>
