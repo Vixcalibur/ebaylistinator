@@ -1,16 +1,27 @@
 from fastapi import FastAPI, Form, Request, UploadFile, File
 from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import csv, re, io
 from pathlib import Path
 from typing import List
 
+BASE_DIR = Path(__file__).resolve().parent
+TPL = BASE_DIR / "templates"
+
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
 
-# Serve everything in ./templates as static; index.html becomes "/"
-app.mount("/", StaticFiles(directory="templates", html=True), name="static")
+# Serve all other plain files (CSS/JS/images) from /static if you have any
+# app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
+# Explicit routes (works even if a proxy rewrites weirdly)
+@app.get("/")
+def home():
+    return FileResponse(TPL / "index.html")
+
+@app.get("/ebaylive.html")
+def ebaylive():
+    return FileResponse(TPL / "ebaylive.html")
 
 @app.post("/generate")
 def generate_csv(
