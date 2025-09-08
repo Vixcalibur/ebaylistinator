@@ -12,6 +12,11 @@ templates = Jinja2Templates(directory="templates")
 def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/")
+def index(request: Request):
+    return templates.TemplateResponse("ebaylive.html", {"request": request})
+
+
 @app.post("/generate")
 def generate_csv(
     request: Request,
