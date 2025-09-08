@@ -8,13 +8,8 @@ from typing import List
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
-@app.get("/", response_class=HTMLResponse)
-def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-@app.get("/ebaylive.html", response_class=HTMLResponse)
-def ebaylive(request: Request):
-    return templates.TemplateResponse("ebaylive.html", {"request": request})
+# Serve everything in ./templates as static; index.html becomes "/"
+app.mount("/", StaticFiles(directory="templates", html=True), name="static")
 
 
 @app.post("/generate")
