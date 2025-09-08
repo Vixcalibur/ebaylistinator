@@ -45,7 +45,7 @@ def generate_csv(
         raise Exception("All input lists must be of equal length.")
 
     def clean_filename(filename: str) -> str:
-        return re.sub(r'[\\/:*?"<>|\s]', '_', filename)
+        return re.sub(r',!&%[\\/:*?"<>|\s]', '_', filename)
 
     if SHIPPING == "0":
         shipping = "FREE SHIPPING - (ID: 231299707026)"
