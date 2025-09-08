@@ -8,12 +8,12 @@ from typing import List
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-@app.get("/ebaylive.html")
-def index(request: Request):
+@app.get("/ebaylive.html", response_class=HTMLResponse)
+def ebaylive(request: Request):
     return templates.TemplateResponse("ebaylive.html", {"request": request})
 
 
