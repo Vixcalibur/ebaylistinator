@@ -208,6 +208,23 @@ function logMessage(message) {
   logBox.textContent += message + '\n';
   logBox.scrollTop = logBox.scrollHeight; // auto-scroll to bottom
 }
+
+document.getElementById('extract-form').addEventListener('submit', async (e) => {
+  e.preventDefault(); // stay on the same page
+  const fd = new FormData(e.target);
+
+  try {
+    const res = await fetch(e.target.action || '/extract-column', {
+      method: 'POST',
+      body: fd
+    });
+    if (!res.ok) throw new Error('Upload failed: ' + res.status);
+    const text = await res.text();
+    document.getElementById('extract-result').value = text;
+  } catch (err) {
+    document.getElementById('extract-result').value = 'Error: ' + err.message;
+  }
+});
     
 </script>
 
