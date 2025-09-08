@@ -184,28 +184,21 @@ def generate_csv(
     )
 
 
-@app.post("/extract-column", response_class=HTMLResponse)
+@app.post("/extract-column", response_class=PlainTextResponse)
 async def extract_column(file: UploadFile = File(...)):
     contents = await file.read()
-    decoded = contents.decode("utf-8")
+    decoded = contents.decode("utf-8", errors="replace")
+
     reader = csv.reader(io.StringIO(decoded))
 
-    # Extract column K (index 10) from each row, skipping header
-    column_j = []
+    # Column K (1-based) = index 10 (0-based). Skip header if you want.
+    out = []
     for i, row in enumerate(reader):
-        if len(row) > 9:  # index 10 = column K
-            column_j.append(row[9])
-        else:
-            column_j.append("")
+        # if i == 0:  # uncomment to skip header row
+        #     continue
+        out.append(row[10] if len(row) > 10 else "")
 
-    # Format as a copy-paste list
-    joined = "\n".join(column_j)
-
-    return f"""
-    <h2>Extracted Column K</h2>
-    <textarea style='width:100%; height:300px'>{joined}</textarea>
-    <br><a href="/">Back</a>
-    """
+    return "\n".join(out)
 
 @app.post("/generate-sku-list")
 def generate_sku_list(first_sku: str = Form(...), last_sku: str = Form(...)):
