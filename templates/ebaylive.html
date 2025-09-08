@@ -49,7 +49,7 @@
 <div class="container">
 
     <!-- LEFT SIDE FORM -->
-    <div class="form-section">
+    <div class="form-section (column 1)">
         <h2>eBayListinator</h2>
 
         <form method="post" action="/generate">
@@ -134,7 +134,7 @@
     </div>
 
     <!-- RIGHT SIDE EXTRACTOR -->
-    <div class="extractor-section">
+    <div class="extractor-section Column2 row 1">
       <h2>Extract ListingIDs from Ebay Results CSV</h2>
 
       <form id="extract-form" action="/extract-column" method="post" enctype="multipart/form-data">
@@ -142,21 +142,22 @@
         <button type="submit">Upload & Extract</button>
       </form>
 
-  <h3>Listing Ids</h3>
-  <textarea id="extract-result" style="width:100%; height:300px;" readonly></textarea>
-    </div>
+      <h3>Listing Ids</h3>
+      <textarea id="extract-result" style="width:100%; height:300px;" readonly></textarea>
 
-<hr>
-<h2>SKU List Generator for OnlineLabels Stickers</h2>
-<form action="/generate-sku-list" method="post">
-  <label for="first_sku">First SKU (e.g., AAA):</label><br>
-  <input type="text" id="first_sku" name="first_sku" maxlength="3" required><br><br>
+    
 
-  <label for="last_sku">Last SKU (e.g., ZZZ):</label><br>
-  <input type="text" id="last_sku" name="last_sku" maxlength="3" required><br><br>
+        <hr>
+        <h2>SKU List Generator for OnlineLabels Stickers</h2>
+        <form action="/generate-sku-list" method="post">
+          <label for="first_sku">First SKU (e.g., AAA):</label><br>
+          <input type="text" id="first_sku" name="first_sku" maxlength="3" required><br><br>
 
-  <button type="submit">Generate SKU List</button>
-</form>
+          <label for="last_sku">Last SKU (e.g., ZZZ):</label><br>
+          <input type="text" id="last_sku" name="last_sku" maxlength="3" required><br><br>
+
+          <button type="submit">Generate SKU List</button>
+        </form>
         
     </div>
 
