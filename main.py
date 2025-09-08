@@ -12,7 +12,7 @@ templates = Jinja2Templates(directory="templates")
 def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-@app.get("/")
+@app.get("/ebaylive.html")
 def index(request: Request):
     return templates.TemplateResponse("ebaylive.html", {"request": request})
 
