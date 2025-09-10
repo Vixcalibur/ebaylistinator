@@ -190,13 +190,11 @@ async def extract_column(file: UploadFile = File(...)):
     decoded = contents.decode("utf-8", errors="replace")
 
     reader = csv.reader(io.StringIO(decoded))
-
-    # Column K (1-based) = index 10 (0-based). Skip header if you want.
     out = []
     for i, row in enumerate(reader):
-        # if i == 0:  # uncomment to skip header row
-        #     continue
-        out.append(row[10] if len(row) > 10 else "")
+        if i == 0:
+            continue
+        out.append(row[9] if len(row) > 9 else "")
 
     return "\n".join(out)
 
