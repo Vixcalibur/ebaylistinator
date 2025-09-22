@@ -1,232 +1,326 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>eBayListinator 3.0</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
+  <meta charset="UTF-8" />
+  <title>eBayListinator 3.0</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#000000; --surface:#001100; --surface-2:#004000;
+      --border:#FF0000; --accent:#006600; --text:#00FFCC; --muted:#448822;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    h2,h3{color:var(--accent);margin-top:0}
+    .container{display:flex;gap:2rem;align-items:flex-start;padding:2rem;flex-wrap:wrap}
+    .panel{background:var(--surface);padding:1.5rem;border-radius:10px;flex:1;min-width:340px;border:1px solid var(--border)}
+    label{display:block;margin:.9rem 0 .35rem;font-weight:600}
+    input[type="text"],input[type="number"],input[type="file"],input[type="datetime-local"],textarea{
+      width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text)
 
-        .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .form-section {
-            width: 52%;
-        }
-
-        .extractor-section {
-            width: 45%;
-            border-left: 1px solid #ccc;
-            padding-left: 20px;
-        }
-
-        table {
-            width: 100%;
-            margin-bottom: 20px;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 8px;
-            border: 1px solid #999;
-        }
-
-        input[type="text"], input[type="number"] {
-            width: 100%;
-        }
-
-        textarea {
-            width: 100%;
-            height: 300px;
-        }
-    </style>
+    }
+    input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(13,110,253,.25)}
+    button, input[type="submit"]{
+      background:var(--accent);color:#fff;border:0;border-radius:6px;padding:9px 14px;cursor:pointer
+    }
+    .btn-secondary{background:var(--accent)}
+    .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+    button:hover, input[type="submit"]:hover{filter:brightness(1.08)}
+    table{width:100%;border-collapse:collapse;margin:.75rem 0 1rem}
+    th,td{border:1px solid var(--border);padding:8px;vertical-align:top}
+    th{background:#002200;text-align:left}
+    img{margin-top:.5rem;border-radius:6px;max-width:100%;background:#000;border:1px solid var(--border)}
+    pre{background:var(--surface);color:var(--muted);padding:1rem;border-radius:6px;border:1px solid var(--border);overflow:auto}
+    .row-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+    .inline-note{color:var(--muted);font-size:.9rem;margin:.25rem 0 .75rem}
+    .spacer{height:8px}
+  </style>
 </head>
 <body>
 
 <div class="container">
 
-    <!-- LEFT SIDE FORM -->
-    <div class="form-section (column 1)">
-        <h2>eBayListinator</h2>
+  <!-- LEFT: main form -->
+  <div class="panel" id="left-panel">
+    <h2>eBayListinator</h2>
 
-        <form method="post" action="/generate">
-            <label><b>Global Listing Settings: ALL ARE REQUIRED</b></label><br><br>
+    <form method="post" action="/generate" id="main-form">
+      <label><b>Global Listing Settings: ALL ARE REQUIRED</b></label>
 
-            <label>Short Title (SHORT TITLE FOR LISTING NAME):</label><br>
-            <input type="text" name="shortTitle" required><br><br>
+      <label>Short Title (SHORT TITLE FOR LISTING NAME):</label>
+      <input type="text" name="shortTitle" required>
 
-            <label>Full Title (FOR LISTING DESCRIPTION):</label><br>
-            <input type="text" name="fullTitle" required><br><br>
-            
-            <label>Photo URL (DOWNLOAD LINK TO THUMBNAIL):</label><br>
-            <input type="text" id="img-url" name="photoURL" oninput="updateImage()" required><br>
-            <label>THUMBNAIL PREVEIW:</label>
-            <img id="preview" src="" alt="Image Preview" style="max-width: 400px; display: none; border: 1px solid #ccc;"><br><br>
+      <label>Full Title (FOR LISTING DESCRIPTION):</label>
+      <input type="text" name="fullTitle" required>
 
-            
+      <label>Photo URL (DOWNLOAD LINK TO THUMBNAIL):</label>
+      <input type="text" id="img-url" name="photoURL" required>
+      <div class="inline-note">Preview updates live from the URL above.</div>
+      <label>THUMBNAIL PREVIEW:</label>
+      <img id="preview" src="" alt="Image Preview" style="display:none;">
 
-            <label>Listing Type (Coins = 0, Bullion = 1, Jewelry = 2):</label><br>
-            <input type="text" name="listingType" required><br><br>
+      <label>Listing Type (Coins = 0, Bullion = 1, Jewelry = 2):</label>
+      <input type="text" name="listingType" required>
 
-            <label>Shipping (FREE = $0, $2.49 = 1):</label><br>
-            <input type="text" name="SHIPPING" required><br><br>
+      <label>Shipping (FREE = $0, $2.49 = 1):</label>
+      <input type="text" name="SHIPPING" required>
 
-            
-            <label><b>INDIVIDUAL LISTING GROUPS (* ARE REQUIRED):</b></label><br><br>
+      <label>Start Time (local):</label>
+      <input type="datetime-local" id="dt" step="1">
+      <div class="row-actions">
+        <input type="text" id="dtDisplay" readonly placeholder="YYYY-MM-DD HH:MM:SS" style="max-width:260px">
+        <input type="hidden" name="startTime" id="startTime">
+        <button class="btn-ghost" type="button" id="nowBtn">Now</button>
+        <button class="btn-ghost" type="button" id="clearBtn">Clear</button>
+      </div>
 
+      <div class="spacer"></div>
+      <label><b>INDIVIDUAL LISTING GROUPS (* ARE REQUIRED):</b></label>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Custom Label SKU</th>
-                        <th>*Item SKU</th>
-                        <th>*Prices</th>
-                        <th>*Starting SKU</th>
-                        <th>*Number of Listings</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>10a</td>
-                        <td>AAA</td>
-                        <td>19</td>
-                        <td>1</td>
-                        <td>40</td>
-                    </tr>
-                    <tr>
-                        <td>20b</td>
-                        <td>AAA</td>
-                        <td>210</td>
-                        <td>41</td>
-                        <td>80</td>
-                    </tr>
-                </tbody>
-            </table>
+      <!-- Example (display-only) -->
+      <table aria-label="Example rows">
+        <thead>
+          <tr>
+            <th>Custom Label SKU</th>
+            <th>*Item SKU</th>
+            <th>*Prices</th>
+            <th>*Starting SKU</th>
+            <th>*Number of Listings</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>10a</td><td>AAA</td><td>19</td><td>1</td><td>40</td></tr>
+          <tr><td>20b</td><td>AAA</td><td>210</td><td>41</td><td>80</td></tr>
+        </tbody>
+      </table>
 
-            <table id="input-grid">
-                <thead>
-                    <tr>
-                        <th>Item SKU</th>
-                        <th>*Custom Label SKU</th>
-                        <th>*Prices</th>
-                        <th>*Starting SKU</th>
-                        <th>*Number of Listings</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><input type="text" name="itemSKU"></td>
-                        <td><input type="text" name="customLabelSKU" required></td>
-                        <td><input type="text" name="prices" required></td>
-                        <td><input type="number" name="startingSKU" required></td>
-                        <td><input type="number" name="numberOfListings" required></td>
-                        <td><button type="button" onclick="removeRow(this)">Remove</button></td>
-                    </tr>
-                </tbody>
-            </table>
+      <!-- Editable grid sent to backend -->
+      <table id="input-grid" aria-label="Input grid">
+        <thead>
+          <tr>
+            <th>Item SKU</th>
+            <th>*Custom Label SKU</th>
+            <th>*Prices</th>
+            <th>*Starting SKU</th>
+            <th>*Number of Listings</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="text" name="itemSKU"></td>
+            <td><input type="text" name="customLabelSKU" required></td>
+            <td><input type="text" name="prices" required></td>
+            <td><input type="number" name="startingSKU" required></td>
+            <td><input type="number" name="numberOfListings" required></td>
+            <td><button type="button" class="btn-secondary" onclick="removeRow(this)">Remove</button></td>
+          </tr>
+        </tbody>
+      </table>
 
-            <button type="button" onclick="addRow()">Add Row</button>
-            <input type="submit" value="Generate CSV">
-        </form>
+      <div class="row-actions">
+        <button type="button" onclick="addRow()">Add Row</button>
+        <input type="submit" value="Generate CSV">
+      </div>
+    </form>
+  </div>
+
+  <!-- RIGHT: CSV upload → extract → copy (client-side) -->
+  <div class="panel" id="right-panel">
+    <h2>Extract ListingIDs from eBay Results (Upload CSV)</h2>
+
+    <label for="csv-file">Upload CSV file:</label>
+    <input type="file" id="csv-file" accept=".csv" />
+
+    <div class="row-actions" style="margin-top:.6rem">
+      <button id="extract-upload-btn" type="button">Extract IDs</button>
+      <button id="copy-btn" class="btn-ghost" type="button">Copy IDs</button>
+      <span class="inline-note">Looks for columns like “Listing ID”, “ListingID”, or “Item ID”.</span>
     </div>
 
-    <!-- RIGHT SIDE EXTRACTOR -->
-    <div class="extractor-section Column2 row 1">
-      <h2>Extract ListingIDs from Ebay Results CSV</h2>
-
-      <form id="extract-form" action="/extract-column" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept=".csv" required><br><br>
-        <button type="submit">Upload & Extract</button>
-      </form>
-
-      <h3>Listing Ids</h3>
-      <textarea id="extract-result" style="width:100%; height:300px;" readonly></textarea>
-
-    
-
-        <hr>
-        <h2>SKU List Generator for OnlineLabels Stickers</h2>
-        <form action="/generate-sku-list" method="post">
-          <label for="first_sku">First SKU (e.g., AAA):</label><br>
-          <input type="text" id="first_sku" name="first_sku" maxlength="3" required><br><br>
-
-          <label for="last_sku">Last SKU (e.g., ZZZ):</label><br>
-          <input type="text" id="last_sku" name="last_sku" maxlength="3" required><br><br>
-
-          <button type="submit">Generate SKU List</button>
-        </form>
-        
-    </div>
+    <h3>Listing Ids</h3>
+    <textarea id="extract-result" readonly style="height:300px"></textarea>
+  </div>
 
 </div>
-    
-<div>
-    <h3>Log Output</h3>
-    <pre id="log-output" style="background:#f1f1f1; padding:10px; border:1px solid #ccc; max-height:300px; overflow-y:auto;"></pre>
+
+<div style="padding:2rem;">
+  <h3>Log Output</h3>
+  <pre id="log-output"></pre>
 </div>
-    
+
 <script>
+/* ----------------- Row handlers ----------------- */
 function addRow() {
-    const table = document.getElementById('input-grid').getElementsByTagName('tbody')[0];
-    const newRow = table.rows[0].cloneNode(true);
-
-    Array.from(newRow.querySelectorAll('input')).forEach(input => {
-        input.value = '';
-    });
-
-    table.appendChild(newRow);
+  var tbody = document.querySelector('#input-grid tbody');
+  var newRow = tbody.rows[0].cloneNode(true);
+  var inputs = newRow.querySelectorAll('input');
+  for (var i=0;i<inputs.length;i++) inputs[i].value = '';
+  tbody.appendChild(newRow);
+}
+function removeRow(btn) {
+  var tbody = document.querySelector('#input-grid tbody');
+  if (tbody.rows.length > 1) btn.closest('tr').remove();
+  else alert('At least one row is required.');
 }
 
-function removeRow(button) {
-  const tableBody = document.getElementById('input-grid').getElementsByTagName('tbody')[0];
-  const row = button.closest('tr');
-  
-  // Only remove if there's more than one row
-  if (tableBody.rows.length > 1) {
-    row.remove();
-  } else {
-    alert("At least one row is required.");
-  }
-}
-
+/* ----------------- Image preview ----------------- */
 function updateImage() {
-  const url = document.getElementById('img-url').value;
-  const img = document.getElementById('preview');
-
-  if (url.trim() !== "") {
-    img.src = url;
-    img.style.display = 'block';
-  } else {
-    img.style.display = 'none';
-  }
+  var url = document.getElementById('img-url').value.trim();
+  var img = document.getElementById('preview');
+  if (url) { img.src = url; img.style.display = 'block'; }
+  else { img.removeAttribute('src'); img.style.display = 'none'; }
 }
+document.getElementById('img-url').addEventListener('input', updateImage);
 
+/* ----------------- Log helper ----------------- */
 function logMessage(message) {
-  const logBox = document.getElementById('log-output');
+  var logBox = document.getElementById('log-output');
   logBox.textContent += message + '\n';
-  logBox.scrollTop = logBox.scrollHeight; // auto-scroll to bottom
+  logBox.scrollTop = logBox.scrollHeight;
 }
 
-document.getElementById('extract-form').addEventListener('submit', async (e) => {
-  e.preventDefault(); // stay on the same page
-  const fd = new FormData(e.target);
+/* ----------------- Date/time (minimal & robust) ----------------- */
+function pad2(n){ return (''+n).padStart(2,'0'); }
+function toDatetimeLocalValue(d){
+  return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+'T'
+       + pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds());
+}
+function dtLocalToSQL(v){
+  // v is "YYYY-MM-DDTHH:MM" or "YYYY-MM-DDTHH:MM:SS"
+  if (!v) return '';
+  var T = v.indexOf('T');
+  if (T === -1) return '';
+  var date = v.slice(0, T);
+  var time = v.slice(T+1);
+  var parts = time.split(':');
+  if (parts.length < 2) return '';
+  var hh = pad2(parts[0] || '0');
+  var mm = pad2(parts[1] || '0');
+  var ss = pad2(parts[2] || '0'); // default seconds to 00 if missing
+  return date + ' ' + hh + ':' + mm + ':' + ss;
+}
+function syncStartTime(){
+  var dtEl = document.getElementById('dt');
+  var out  = document.getElementById('dtDisplay');
+  var hid  = document.getElementById('startTime');
+  if (!dtEl || !out || !hid) return;
+  var sql = dtLocalToSQL(dtEl.value);
+  out.value = sql;
+  hid.value = sql;
+}
+(function initStartTime(){
+  var dt = document.getElementById('dt');
+  var form = document.getElementById('main-form');
+  var nowBtn = document.getElementById('nowBtn');
+  var clearBtn = document.getElementById('clearBtn');
 
-  try {
-    const res = await fetch(e.target.action || '/extract-column', {
-      method: 'POST',
-      body: fd
+  if (dt){
+    dt.addEventListener('input',  syncStartTime);
+    dt.addEventListener('change', syncStartTime);
+  }
+  if (nowBtn){
+    nowBtn.addEventListener('click', function(){
+      dt.value = toDatetimeLocalValue(new Date());
+      syncStartTime();
     });
-    if (!res.ok) throw new Error('Upload failed: ' + res.status);
-    const text = await res.text();
-    document.getElementById('extract-result').value = text;
-  } catch (err) {
-    document.getElementById('extract-result').value = 'Error: ' + err.message;
+  }
+  if (clearBtn){
+    clearBtn.addEventListener('click', function(){
+      dt.value = '';
+      syncStartTime();
+    });
+  }
+  if (form){
+    form.addEventListener('submit', syncStartTime);
+  }
+  // Initialize once
+  syncStartTime();
+})();
+
+/* ----------------- CSV upload → Extract IDs (client-side) ----------------- */
+function parseCSV(text){
+  var rows = [], row = [], field = '', inQuotes = false;
+  for (var i=0; i<text.length; i++){
+    var c = text[i], n = text[i+1];
+    if (inQuotes){
+      if (c === '"' && n === '"'){ field += '"'; i++; }
+      else if (c === '"'){ inQuotes = false; }
+      else { field += c; }
+    } else {
+      if (c === '"'){ inQuotes = true; }
+      else if (c === ','){ row.push(field); field=''; }
+      else if (c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else if (c === '\r'){ /* ignore CR */ }
+      else { field += c; }
+    }
+  }
+  if (field.length || inQuotes) row.push(field);
+  if (row.length) rows.push(row);
+  return rows;
+}
+function findIdColumn(headers){
+  var candidates = ["listing id","listingid","item id","itemid","id"];
+  function norm(s){ return (s||'').trim().toLowerCase(); }
+  for (var i=0;i<headers.length;i++){
+    var h = norm(headers[i]);
+    if (candidates.indexOf(h) !== -1) return i;
+    if (h.indexOf('listing') !== -1 && h.indexOf('id') !== -1) return i; // fuzzy
+  }
+  return -1;
+}
+
+var uploadedCSVText = '';
+document.getElementById('csv-file').addEventListener('change', function(e){
+  var file = e.target.files && e.target.files[0];
+  var out = document.getElementById('extract-result');
+  if (!file){ out.value = 'No file selected.'; return; }
+  var reader = new FileReader();
+  reader.onload = function(){
+    uploadedCSVText = String(reader.result || '');
+    out.value = '(Loaded '+file.name+', size '+file.size.toLocaleString()+' bytes.)\nClick "Extract IDs".';
+  };
+  reader.onerror = function(){ uploadedCSVText = ''; out.value = 'Failed to read file.'; };
+  reader.readAsText(file);
+});
+
+document.getElementById('extract-upload-btn').addEventListener('click', function(){
+  var out = document.getElementById('extract-result');
+  if (!uploadedCSVText){ out.value = 'Please choose a CSV file first.'; return; }
+
+  var rows = parseCSV(uploadedCSVText);
+  if (!rows.length){ out.value = 'Could not read CSV.'; return; }
+
+  var headers = rows[0];
+  var col = findIdColumn(headers);
+  if (col === -1){
+    out.value = 'Could not find a “Listing ID” column. Looked for: Listing ID, ListingID, Item ID.';
+    return;
+  }
+
+  var ids = [];
+  for (var r=1; r<rows.length; r++){
+    if (rows[r] && rows[r].length > col){
+      var v = (rows[r][col]||'').trim();
+      if (v) ids.push(v);
+    }
+  }
+  out.value = ids.join('\n') || '(No IDs found in that column.)';
+});
+
+document.getElementById('copy-btn').addEventListener('click', function(){
+  var text = document.getElementById('extract-result').value;
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){ logMessage('IDs copied to clipboard.'); })
+    .catch(function(e){ logMessage('Copy failed: '+e.message); });
+  } else {
+    var ta = document.getElementById('extract-result');
+    ta.select(); document.execCommand('copy'); ta.setSelectionRange(0,0);
+    logMessage('IDs copied to clipboard.');
   }
 });
-    
 </script>
 
 </body>
