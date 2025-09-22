@@ -31,6 +31,7 @@ def generate_csv(
     fullTitle: str = Form(...),
     listingType: str = Form(...),
     SHIPPING: str = Form(...),
+    SchedualDate: str = Form(...),
     itemSKU: List[str] = Form(...),
     customLabelSKU: List[str] = Form(...),
     startingSKU: List[int] = Form(...),
@@ -85,7 +86,7 @@ def generate_csv(
                 listingName = j_customLabelSKU + " C: LIVE " + title + " RTTV"
                 desc = f"Item Shown on Screen During {fullTitle}"
                 row = ["Add", j_customLabelSKU, "525", "/Coins & Paper Money/Coins: US/Collections, Lots",
-                       listingName, "", "", "", "", price, "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
+                       listingName, "", "", SchedualDate, "", price, "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
                        "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", "", shipping,
                        "No Return Accepted (234360674026) - (ID: 234360674026)",
                        "Auction - (ID: 231040727026)", "Uncertified", "", "", "", "", "", ""]
@@ -116,7 +117,7 @@ def generate_csv(
                 listingName = j_customLabelSKU + " C: LIVE " + title + " RTTV"
                 desc = f"Item Shown on Screen During {fullTitle}"
                 row = ["Add", j_customLabelSKU, "39489", "/Coins & Paper Money/Bullion/Silver/Bars & Rounds",
-                       listingName, "", "", "", "", price, "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
+                       listingName, "", "", SchedualDate, "", price, "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
                        "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", "", shipping,
                        "No Return Accepted (234360674026) - (ID: 234360674026)",
                        "Auction - (ID: 231040727026)","","","",0.999]
@@ -156,7 +157,7 @@ def generate_csv(
                 listingName = j_customLabelSKU + " C: LIVE " + title + " RTTV"
                 desc = f"Item Shown on Screen During {fullTitle}"
                 row = ["Add", j_customLabelSKU, "260326", "/Jewelry & Watches/Watches, Parts & Accessories/Watches/Other Watches",
-                       listingName, "", "", "", "", price, "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
+                       listingName, "", "", SchedualDate, "", price, "1", photoURL, "", "3000-Used", desc, "Auction", "7", "", "", "", "",
                        "", "Marietta, GA", "", "", "", "", "", "", "", "", "", "", "", shipping,
                        "No Return Accepted (234360674026) - (ID: 234360674026)",
                        "Auction - (ID: 231040727026)","Unbranded","Unisex Adults","Key Ring Watch","","","","","","","","",
