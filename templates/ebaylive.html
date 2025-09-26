@@ -127,7 +127,7 @@
       <input type="text" name="fullTitle" required>
 
       <label>Photo URL (DOWNLOAD LINK TO THUMBNAIL):</label>
-      <input type="text" id="img-url" name="photoURL" required>
+      <input type="text" id="photoURL" name="photoURL" required>
       <div class="inline-note">Preview updates live from the URL above.</div>
       <label>THUMBNAIL PREVIEW:</label>
       <img id="preview" src="" alt="Image Preview" style="display:none;">
@@ -239,12 +239,12 @@ function removeRow(btn) {
 
 /* ----------------- Image preview ----------------- */
 function updateImage() {
-  var url = document.getElementById('img-url').value.trim();
+  var url = document.getElementById('photoURL').value.trim();
   var img = document.getElementById('preview');
   if (url) { img.src = url; img.style.display = 'block'; }
   else { img.removeAttribute('src'); img.style.display = 'none'; }
 }
-document.getElementById('img-url').addEventListener('input', updateImage);
+document.getElementById('photoURL').addEventListener('input', updateImage);
 
 /* ----------------- Log helper ----------------- */
 function logMessage(message) {
