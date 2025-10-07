@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Letter→Number List Generator (AAA → ZGA × 001–280)</title>
+<style>
+  :root{ --bg:#0b0c10; --surface:#111218; --muted:#a7a7b3; --text:#f5f7ff; --accent:#4ea1ff; }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+  .wrap{max-width:900px;margin:0 auto;padding:28px}
+  h1{margin:0 0 8px;font-size:24px}
+  p{margin:0 0 18px;color:var(--muted)}
+  .panel{background:var(--surface);border:1px solid #222434;border-radius:14px;padding:16px}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+  .span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-6{grid-column:span 6}.span-12{grid-column:1/-1}
+  label{font-size:12px;color:var(--muted);display:block;margin:2px 0 6px}
+  input,button,textarea{width:100%;font-size:14px;border-radius:10px;border:1px solid #2a2d42;background:#0f1016;color:var(--text)}
+  input{padding:10px 12px}
+  textarea{height:420px;resize:vertical;padding:12px}
+  .row{display:flex;gap:8px}
+  .btn{padding:10px 14px;cursor:pointer;font-weight:600}
+  .primary{background:var(--accent);border-color:var(--accent);color:#07121f}
+  .ghost{background:#0f1016}
+  .meta{font-size:12px;color:var(--muted);margin-top:6px}
+  .stat{font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Letter → Number List Generator</h1>
+    <p>Outputs one line per code in the order <em>AAA, BAA, CAA, … ZAA, ABA, …</em> and appends a number range (e.g., 001–280) to <strong>each</strong> 3‑letter code.</p>
+
+    <div class="panel">
+      <div class="grid">
+        <div class="span-12">
+          <label for="title">Title (first line)</label>
+          <input id="title" placeholder="e.g., AAA–ZGA × 001–280" value="AAA–ZGA × 001–280" />
+        </div>
+        <div class="span-3">
+          <label for="start">Start letters (AAA)</label>
+          <input id="start" value="AAA" maxlength="3"/>
+        </div>
+        <div class="span-3">
+          <label for="end">End letters (ZGA)</label>
+          <input id="end" value="ZGA" maxlength="3"/>
+        </div>
+        <div class="span-3">
+          <label for="nStart">Number start</label>
+          <input id="nStart" type="number" value="1" min="0"/>
+        </div>
+        <div class="span-3">
+          <label for="nEnd">Number end</label>
+          <input id="nEnd" type="number" value="280" min="0"/>
+        </div>
+        <div class="span-3">
+          <label for="pad">Number padding</label>
+          <input id="pad" type="number" value="3" min="0"/>
+        </div>
+        <div class="span-3">
+          <label for="format">Format</label>
+          <input id="format" value="{LETTERS} {NUMBER}" />
+        </div>
+        <div class="span-6">
+          <label>&nbsp;</label>
+          <div class="row">
+            <button class="btn primary" id="gen">Generate</button>
+            <button class="btn ghost" id="copy">Copy</button>
+            <button class="btn ghost" id="download">Download .txt</button>
+          </div>
+        </div>
+        <div class="span-12">
+          <textarea id="out" spellcheck="false" placeholder="Your list will appear here..."></textarea>
+          <div class="meta">
+            <span class="stat" id="lettersCount">0</span> letter blocks ×
+            <span class="stat" id="numbersCount">0</span> numbers =
+            <span class="stat" id="bodyCount">0</span> lines (+
+            <span class="stat">1</span> title) →
+            <span class="stat" id="totalCount">0</span> total lines
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const el = id=>document.getElementById(id);
+  const norm3 = s => s.toUpperCase().replace(/[^A-Z]/g,'').slice(0,3);
+  function toIndex(abc){
+    const s = norm3(abc);
+    if(s.length!==3) throw new Error('Letters must be exactly 3 A–Z');
+    const a=s.charCodeAt(0)-65, b=s.charCodeAt(1)-65, c=s.charCodeAt(2)-65;
+    if(a<0||b<0||c<0) throw new Error('Letters must be A–Z');
+    return a + b*26 + c*26*26; // AAA, BAA, ..., ZAA, ABA, ...
+  }
+  function fromIndex(idx){
+    const c = Math.floor(idx/(26*26));
+    const r = idx%(26*26);
+    const b = Math.floor(r/26);
+    const a = r%26;
+    return String.fromCharCode(65+a)+String.fromCharCode(65+b)+String.fromCharCode(65+c);
+  }
+  function makeLetterRange(a,b){
+    const start = toIndex(a), end = toIndex(b);
+    if(end<start) throw new Error('End must be ≥ start');
+    const out=[]; for(let i=start;i<=end;i++) out.push(fromIndex(i));
+    return out;
+  }
+  function generate(){
+    try{
+      const title = el('title').value.trim();
+      const start = el('start').value; const end = el('end').value;
+      const nStart = parseInt(el('nStart').value,10);
+      const nEnd = parseInt(el('nEnd').value,10);
+      const pad = parseInt(el('pad').value,10);
+      const fmt = el('format').value;
+
+      if(nEnd < nStart) throw new Error('Number end must be ≥ start');
+
+      const letters = makeLetterRange(start,end);
+      const numbers = []; for(let n=nStart;n<=nEnd;n++) numbers.push(String(n).padStart(pad,'0'));
+
+      const body = [];
+      for(const L of letters){
+        for(const N of numbers){ body.push( fmt.replaceAll('{LETTERS}', L).replaceAll('{NUMBER}', N) ); }
+      }
+
+      const lines = (title? [title]:[]).concat(body);
+      el('out').value = lines.join('\n');
+
+      // stats
+      el('lettersCount').textContent = String(letters.length);
+      el('numbersCount').textContent = String(numbers.length);
+      el('bodyCount').textContent = String(body.length);
+      el('totalCount').textContent = String(lines.length);
+    }catch(e){ alert(e.message || String(e)); }
+  }
+  function copy(){
+    navigator.clipboard.writeText(el('out').value).then(()=>{
+      const t=el('copy'); const old=t.textContent; t.textContent='Copied!'; setTimeout(()=>t.textContent=old,900);
+    });
+  }
+  function download(){
+    const blob = new Blob([el('out').value+'\n'], {type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download='letter-number-range.txt'; a.click();
+    URL.revokeObjectURL(url);
+  }
+  el('gen').addEventListener('click', generate);
+  el('copy').addEventListener('click', copy);
+  el('download').addEventListener('click', download);
+  ['start','end'].forEach(id=> el(id).addEventListener('input', e=> e.target.value = norm3(e.target.value) ));
+  // First render
+  generate();
+</script>
+</body>
+</html>
