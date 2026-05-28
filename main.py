@@ -162,9 +162,7 @@ def generate_csv(
                        "No Return Accepted (234360674026) - (ID: 234360674026)",
                        "Auction - (ID: 231040727026)","Unbranded","Unisex Adults","Key Ring Watch","","","","","","","","",
                        "","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
-                rows.append(row)   
-    else:
-        raise Exception("Only Listing Types '0' (Coins), '1' (Bullion), and '2' (Jewelry) are supported.")
+                rows.append(row)
     # JEWELRY
     
     # CARDS
@@ -221,7 +219,11 @@ def generate_csv(
                         "Auction - (ID: 231040727026)"
                         ]
                 rows.append(row)    
-    #CARDS
+    #CARDS 
+    #UNKNOWN
+    else:
+        raise Exception("Only Listing Types '0' (Coins), '1' (Bullion), and '2' (Jewelry) are supported.")
+    #UNKNOWN
 
     filename = clean_filename(fullTitle) + ".csv"
     import io
