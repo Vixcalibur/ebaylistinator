@@ -36,7 +36,7 @@ def generate_csv(
     customLabelSKU: List[str] = Form(...),
     startingSKU: List[int] = Form(...),
     numberOfListings: List[int] = Form(...),
-    prices: List[int] = Form(...)
+    prices: List[float] = Form(...)
 ):
 
     numberOfListings = [int(x) for x in numberOfListings]
