@@ -31,7 +31,7 @@ def generate_csv(
     fullTitle: str = Form(...),
     listingType: str = Form(...),
     SHIPPING: str = Form(...),
-    startTime: str = Form(...),
+    startTime: str = Form(""),
     itemSKU: List[str] = Form(...),
     customLabelSKU: List[str] = Form(...),
     startingSKU: List[int] = Form(...),
