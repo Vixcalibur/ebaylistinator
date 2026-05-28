@@ -166,6 +166,7 @@ def generate_csv(
     else:
         raise Exception("Only Listing Types '0' (Coins), '1' (Bullion), and '2' (Jewelry) are supported.")
     # JEWELRY
+    
     # CARDS
     elif listingType == "3":
         headers = [
