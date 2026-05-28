@@ -167,7 +167,7 @@ def generate_csv(
         raise Exception("Only Listing Types '0' (Coins), '1' (Bullion), and '2' (Jewelry) are supported.")
     # JEWELRY
     # CARDS
-    elif listingType == "1":
+    elif listingType == "3":
         headers = [
                     "*Action(SiteID=US|Country=US|Currency=USD|Version=1193)",
                     "Custom Label (SKU)",
