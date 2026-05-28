@@ -166,6 +166,61 @@ def generate_csv(
     else:
         raise Exception("Only Listing Types '0' (Coins), '1' (Bullion), and '2' (Jewelry) are supported.")
     # JEWELRY
+    # CARDS
+    elif listingType == "1":
+        headers = [
+                    "*Action(SiteID=US|Country=US|Currency=USD|Version=1193)",
+                    "Custom Label (SKU)",
+                    "Category ID",
+                    "Category Name",
+                    "Title",
+                    "Schedule Time",
+                    "Start price",
+                    "Quantity",
+                    "Item photo URL",
+                    "Condition ID",
+                    "C:Franchise",
+                    "Description",
+                    "Format",
+                    "Duration",
+                    "Location",
+                    "Shipping profile name",
+                    "Return profile name",
+                    "Payment profile name"
+                    ]
+        for i in range(len(customLabelSKU)):
+            i_customLabelSKU = customLabelSKU[i]
+            i_itemSKU = itemSKU[i]
+            for j in range(numberOfListings[i]):
+                num = startingSKU[i] + j
+                suffix = f"{num:03}"
+                j_customLabelSKU = i_customLabelSKU + " " + suffix + " " + i_itemSKU
+                title=f"{shortTitle}"
+                price=f"{prices[i]}"
+                listingName = j_customLabelSKU + " C: LIVE " + title + " RTTV"
+                desc = f"Item Shown on Screen During {fullTitle}"
+                row = [
+                        "Add", 
+                        j_customLabelSKU, 
+                        "39489", 
+                        "/Coins & Paper Money/Bullion/Silver/Bars & Rounds",
+                        listingName, 
+                        startTime, 
+                        price, 
+                        "1", 
+                        photoURL, 
+                        "3000-Used", 
+                        "Pokemon,
+                        desc, 
+                        "Auction", 
+                        "7",
+                        "Marietta, 
+                        shipping,
+                        "No Return Accepted (234360674026) - (ID: 234360674026)",
+                        "Auction - (ID: 231040727026)"
+                        ]
+                rows.append(row)    
+    #CARDS
 
     filename = clean_filename(fullTitle) + ".csv"
     import io
