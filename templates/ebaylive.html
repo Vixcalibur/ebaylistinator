@@ -118,6 +118,1082 @@
     <h2>eBayLive Listing Generator</h2>
 
     <form method="post" action="/generate" id="main-form">
+      <!-- ===== SHOW TEMPLATES ===== -->
+      <div style="background:#f0f4ff;border:1px solid #b0c4f0;border-radius:8px;padding:12px 14px;margin-bottom:1rem">
+        <b>Show Templates</b>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
+          <select id="templateSelect" style="flex:1;min-width:160px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text)">
+            <option value="">-- Select a saved show --</option>
+          </select>
+          <button type="button" id="loadTemplateBtn" class="btn-ghost">Load</button>
+          <button type="button" id="deleteTemplateBtn" class="btn-ghost" style="color:#c00">Delete</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
+          <input type="text" id="templateNameInput" placeholder="Template name (e.g. Silver Show June)" style="flex:1;min-width:160px">
+          <button type="button" id="saveTemplateBtn">Save as Template</button>
+        </div>
+        <div id="templateMsg" style="font-size:.85rem;margin-top:6px;color:green;min-height:1.2em"></div>
+      </div>
+      <!-- ===== /SHOW TEMPLATES ===== -->
+
+      <label><b>Global Listing Settings: ALL ARE REQUIRED</b></label>
+
+      <label>Short Title (SHORT TITLE FOR LISTING NAME):</label>
+      <input type="text" name="shortTitle" required>
+
+      <label>Full Title (FOR LISTING DESCRIPTION):</label>
+      <input type="text" name="fullTitle" required>
+
+      <label>Photo URL (DOWNLOAD LINK TO THUMBNAIL):</label>
+      <input type="text" id="photoURL" name="photoURL" required>
+      <div class="inline-note">Preview updates live from the URL above.</div>
+      <label>THUMBNAIL PREVIEW:</label>
+      <img id="preview" src="" alt="Image Preview" style="display:none;">
+
+      <label>Listing Type:</label>
+      <select name="listingType" id="listingType" required style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text)">
+        <option value="0">Coins</option>
+        <option value="1">Bullion</option>
+        <option value="2">Jewelry</option>
+        <option value="3">Cards</option>
+      </select>
+
+      <label>Shipping:</label>
+      <select name="SHIPPING" id="SHIPPING" required style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text)">
+        <option value="0">Free Shipping</option>
+        <option value="1">$2.49 per item</option>
+      </select>
+
+      <label>Start Time (local):</label>
+      <input type="datetime-local" id="dt" step="1">
+      <div class="row-actions">
+        <input type="text" id="dtDisplay" readonly placeholder="YYYY-MM-DD HH:MM:SS" style="max-width:260px">
+        <input type="hidden" name="startTime" id="startTime">
+        <button class="btn-ghost" type="button" id="nowBtn">Now</button>
+        <button class="btn-ghost" type="button" id="clearBtn">Clear</button>
+      </div>
+
+      <div class="spacer"></div>
+      <label><b>INDIVIDUAL LISTING GROUPS (* ARE REQUIRED):</b></label>
+
+      <!-- Example (display-only) -->
+      <table aria-label="Example rows">
+        <thead>
+          <tr>
+            <th>Custom Label SKU</th>
+            <th>*Item SKU</th>
+            <th>*Prices</th>
+            <th>*Starting SKU</th>
+            <th>*Number of Listings</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>10a</td><td>AAA</td><td>19</td><td>1</td><td>40</td></tr>
+          <tr><td>20b</td><td>AAA</td><td>210</td><td>41</td><td>80</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Editable grid sent to backend -->
+      <table id="input-grid" aria-label="Input grid">
+        <thead>
+          <tr>
+            <th>Item SKU</th>
+            <th>*Custom Label SKU</th>
+            <th>*Prices</th>
+            <th>*Starting SKU</th>
+            <th>*Number of Listings</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="text" name="itemSKU"></td>
+            <td><input type="text" name="customLabelSKU" required></td>
+            <td><input type="text" name="prices" required></td>
+            <td><input type="number" name="startingSKU" required></td>
+            <td><input type="number" name="numberOfListings" required></td>
+            <td><button type="button" class="btn-secondary" onclick="removeRow(this)">Remove</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="row-actions">
+        <button type="button" onclick="addRow()">Add Row</button>
+        <input type="submit" value="Generate CSV">
+      </div>
+    </form>
+  </div>
+
+  <!-- RIGHT: CSV upload → extract → copy (client-side) -->
+  <div class="panel" id="right-panel">
+    <h2>Extract ListingIDs from eBay Results (Upload CSV)</h2>
+
+    <label for="csv-file">Upload CSV file:</label>
+    <input type="file" id="csv-file" accept=".csv" />
+
+    <div class="row-actions" style="margin-top:.6rem">
+      <button id="extract-upload-btn" type="button">Extract IDs</button>
+      <button id="copy-btn" class="btn-ghost" type="button">Copy IDs</button>
+      <span class="inline-note">Looks for columns like “Listing ID”, “ListingID”, or “Item ID”.</span>
+    </div>
+
+    <h3>Listing Ids</h3>
+    <textarea id="extract-result" readonly style="height:300px"></textarea>
+  </div>
+
+</div>
+
+<div style="padding:2rem;">
+  <h3>Log Output</h3>
+  <pre id="log-output"></pre>
+</div>
+
+<script>
+/* ----------------- Row handlers ----------------- */
+function addRow() {
+  var tbody = document.querySelector('#input-grid tbody');
+  var newRow = tbody.rows[0].cloneNode(true);
+  var inputs = newRow.querySelectorAll('input');
+  for (var i=0;i<inputs.length;i++) inputs[i].value = '';
+  tbody.appendChild(newRow);
+}
+function removeRow(btn) {
+  var tbody = document.querySelector('#input-grid tbody');
+  if (tbody.rows.length > 1) btn.closest('tr').remove();
+  else alert('At least one row is required.');
+}
+
+/* ----------------- Image preview ----------------- */
+function updateImage() {
+  var url = document.getElementById('photoURL').value.trim();
+  var img = document.getElementById('preview');
+  if (url) { img.src = url; img.style.display = 'block'; }
+  else { img.removeAttribute('src'); img.style.display = 'none'; }
+}
+document.getElementById('photoURL').addEventListener('input', updateImage);
+
+/* ----------------- Log helper ----------------- */
+function logMessage(message) {
+  var logBox = document.getElementById('log-output');
+  logBox.textContent += message + '\n';
+  logBox.scrollTop = logBox.scrollHeight;
+}
+
+/* ----------------- Date/time (minimal & robust) ----------------- */
+function pad2(n){ return (''+n).padStart(2,'0'); }
+function toDatetimeLocalValue(d){
+  return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+'T'
+       + pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds());
+}
+function dtLocalToSQL(v){
+  // v is "YYYY-MM-DDTHH:MM" or "YYYY-MM-DDTHH:MM:SS"
+  if (!v) return '';
+  var T = v.indexOf('T');
+  if (T === -1) return '';
+  var date = v.slice(0, T);
+  var time = v.slice(T+1);
+  var parts = time.split(':');
+  if (parts.length < 2) return '';
+  var hh = pad2(parts[0] || '0');
+  var mm = pad2(parts[1] || '0');
+  var ss = pad2(parts[2] || '0'); // default seconds to 00 if missing
+  return date + ' ' + hh + ':' + mm + ':' + ss;
+}
+function syncStartTime(){
+  var dtEl = document.getElementById('dt');
+  var out  = document.getElementById('dtDisplay');
+  var hid  = document.getElementById('startTime');
+  if (!dtEl || !out || !hid) return;
+  var sql = dtLocalToSQL(dtEl.value);
+  out.value = sql;
+  hid.value = sql;
+}
+(function initStartTime(){
+  var dt = document.getElementById('dt');
+  var form = document.getElementById('main-form');
+  var nowBtn = document.getElementById('nowBtn');
+  var clearBtn = document.getElementById('clearBtn');
+
+  if (dt){
+    dt.addEventListener('input',  syncStartTime);
+    dt.addEventListener('change', syncStartTime);
+  }
+  if (nowBtn){
+    nowBtn.addEventListener('click', function(){
+      dt.value = toDatetimeLocalValue(new Date());
+      syncStartTime();
+    });
+  }
+  if (clearBtn){
+    clearBtn.addEventListener('click', function(){
+      dt.value = '';
+      syncStartTime();
+    });
+  }
+  if (form){
+    form.addEventListener('submit', syncStartTime);
+  }
+  // Initialize once
+  syncStartTime();
+})();
+
+/* ----------------- CSV upload → Extract IDs (client-side) ----------------- */
+function parseCSV(text){
+  var rows = [], row = [], field = '', inQuotes = false;
+  for (var i=0; i<text.length; i++){
+    var c = text[i], n = text[i+1];
+    if (inQuotes){
+      if (c === '"' && n === '"'){ field += '"'; i++; }
+      else if (c === '"'){ inQuotes = false; }
+      else { field += c; }
+    } else {
+      if (c === '"'){ inQuotes = true; }
+      else if (c === ','){ row.push(field); field=''; }
+      else if (c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else if (c === '\r'){ /* ignore CR */ }
+      else { field += c; }
+    }
+  }
+  if (field.length || inQuotes) row.push(field);
+  if (row.length) rows.push(row);
+  return rows;
+}
+function findIdColumn(headers){
+  var candidates = ["listing id","listingid","item id","itemid","id"];
+  function norm(s){ return (s||'').trim().toLowerCase(); }
+  for (var i=0;i<headers.length;i++){
+    var h = norm(headers[i]);
+    if (candidates.indexOf(h) !== -1) return i;
+    if (h.indexOf('listing') !== -1 && h.indexOf('id') !== -1) return i; // fuzzy
+  }
+  return -1;
+}
+
+var uploadedCSVText = '';
+document.getElementById('csv-file').addEventListener('change', function(e){
+  var file = e.target.files && e.target.files[0];
+  var out = document.getElementById('extract-result');
+  if (!file){ out.value = 'No file selected.'; return; }
+  var reader = new FileReader();
+  reader.onload = function(){
+    uploadedCSVText = String(reader.result || '');
+    out.value = '(Loaded '+file.name+', size '+file.size.toLocaleString()+' bytes.)\nClick "Extract IDs".';
+  };
+  reader.onerror = function(){ uploadedCSVText = ''; out.value = 'Failed to read file.'; };
+  reader.readAsText(file);
+});
+
+document.getElementById('extract-upload-btn').addEventListener('click', function(){
+  var out = document.getElementById('extract-result');
+  if (!uploadedCSVText){ out.value = 'Please choose a CSV file first.'; return; }
+
+  var rows = parseCSV(uploadedCSVText);
+  if (!rows.length){ out.value = 'Could not read CSV.'; return; }
+
+  var headers = rows[0];
+  var col = findIdColumn(headers);
+  if (col === -1){
+    out.value = 'Could not find a “Listing ID” column. Looked for: Listing ID, ListingID, Item ID.';
+    return;
+  }
+
+  var ids = [];
+  for (var r=1; r<rows.length; r++){
+    if (rows[r] && rows[r].length > col){
+      var v = (rows[r][col]||'').trim();
+      if (v) ids.push(v);
+    }
+  }
+  out.value = ids.join('\n') || '(No IDs found in that column.)';
+});
+
+/* ===== SHOW TEMPLATES (localStorage) =====
+   Saves: shortTitle, fullTitle, photoURL, listingType, SHIPPING
+   Does NOT save: itemSKU rows, startTime (those are per-show)
+*/
+(function(){
+  var STORE_KEY = 'ebayListinatorTemplates';
+
+  function loadStore(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'{}'); }catch(e){ return {}; } }
+  function saveStore(obj){ localStorage.setItem(STORE_KEY, JSON.stringify(obj)); }
+
+  function refreshDropdown(){
+    var sel = document.getElementById('templateSelect');
+    var current = sel.value;
+    var store = loadStore();
+    sel.innerHTML = '<option value="">-- Select a saved show --</option>';
+    Object.keys(store).sort().forEach(function(name){
+      var opt = document.createElement('option');
+      opt.value = name; opt.textContent = name;
+      if(name === current) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+
+  function setMsg(txt, color){
+    var el = document.getElementById('templateMsg');
+    el.textContent = txt;
+    el.style.color = color || 'green';
+    setTimeout(function(){ if(el.textContent===txt) el.textContent=''; }, 3000);
+  }
+
+  function getFormValues(){
+    var rows = [];
+    document.querySelectorAll('#input-grid tbody tr').forEach(function(tr){
+      var inputs = tr.querySelectorAll('input');
+      rows.push({
+        customLabelSKU:   inputs[1] ? inputs[1].value : '',
+        prices:           inputs[2] ? inputs[2].value : '',
+        startingSKU:      inputs[3] ? inputs[3].value : '',
+        numberOfListings: inputs[4] ? inputs[4].value : ''
+      });
+    });
+    return {
+      shortTitle:  (document.querySelector('[name=shortTitle]')||{}).value || '',
+      fullTitle:   (document.querySelector('[name=fullTitle]')||{}).value  || '',
+      photoURL:    (document.getElementById('photoURL')||{}).value        || '',
+      listingType: (document.getElementById('listingType')||{}).value     || '0',
+      SHIPPING:    (document.getElementById('SHIPPING')||{}).value        || '0',
+      rows: rows
+    };
+  }
+
+  function applyTemplate(data){
+    if(!data) return;
+    var f;
+    f = document.querySelector('[name=shortTitle]'); if(f) f.value = data.shortTitle||'';
+    f = document.querySelector('[name=fullTitle]');  if(f) f.value = data.fullTitle||'';
+    f = document.getElementById('photoURL');         if(f){ f.value = data.photoURL||''; updateImage(); }
+    f = document.getElementById('listingType');      if(f) f.value = data.listingType||'0';
+    f = document.getElementById('SHIPPING');         if(f) f.value = data.SHIPPING||'0';
+    if(data.rows && data.rows.length){
+      var tbody = document.querySelector('#input-grid tbody');
+      while(tbody.rows.length > 1) tbody.deleteRow(1);
+      data.rows.forEach(function(r, i){
+        if(i > 0){
+          var newRow = tbody.rows[0].cloneNode(true);
+          tbody.appendChild(newRow);
+        }
+        var inputs = tbody.rows[i].querySelectorAll('input');
+        if(inputs[0]) inputs[0].value = '';
+        if(inputs[1]) inputs[1].value = r.customLabelSKU || '';
+        if(inputs[2]) inputs[2].value = r.prices || '';
+        if(inputs[3]) inputs[3].value = r.startingSKU || '';
+        if(inputs[4]) inputs[4].value = r.numberOfListings || '';
+      });
+    }
+  }
+
+  document.getElementById('saveTemplateBtn').addEventListener('click', function(){
+    var name = document.getElementById('templateNameInput').value.trim();
+    if(!name){ setMsg('Enter a template name first.', '#c00'); return; }
+    var store = loadStore();
+    store[name] = getFormValues();
+    saveStore(store);
+    refreshDropdown();
+    document.getElementById('templateSelect').value = name;
+    setMsg('Saved "'+name+'"');
+  });
+
+  document.getElementById('loadTemplateBtn').addEventListener('click', function(){
+    var name = document.getElementById('templateSelect').value;
+    if(!name){ setMsg('Select a template to load.', '#c00'); return; }
+    var store = loadStore();
+    if(!store[name]){ setMsg('Template not found.', '#c00'); return; }
+    applyTemplate(store[name]);
+    document.getElementById('templateNameInput').value = name;
+    setMsg('Loaded "'+name+'"');
+  });
+
+  document.getElementById('deleteTemplateBtn').addEventListener('click', function(){
+    var name = document.getElementById('templateSelect').value;
+    if(!name){ setMsg('Select a template to delete.', '#c00'); return; }
+    if(!confirm('Delete template "'+name+'"?')) return;
+    var store = loadStore();
+    delete store[name];
+    saveStore(store);
+    refreshDropdown();
+    setMsg('Deleted "'+name+'"', '#c00');
+  });
+
+  refreshDropdown();
+})();
+/* ===== /SHOW TEMPLATES ===== */
+
+document.getElementById('copy-btn').addEventListener('click', function(){
+  var text = document.getElementById('extract-result').value;
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){ logMessage('IDs copied to clipboard.'); })
+    .catch(function(e){ logMessage('Copy failed: '+e.message); });
+  } else {
+    var ta = document.getElementById('extract-result');
+    ta.select(); document.execCommand('copy'); ta.setSelectionRange(0,0);
+    logMessage('IDs copied to clipboard.');
+  }
+});
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>eBayListinator 3.0</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#FFFFFF; --surface:#FFFFFF; --surface-2:#FFFFFF;
+      --border:#8f8f8f; --accent:#0968f6; --text:#000000; --muted:#FFFFFF;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    h2,h3{color:var(--text);margin-top:0}
+    .container{display:flex;gap:2rem;align-items:flex-start;padding:2rem;flex-wrap:wrap}
+    .panel{background:var(--surface);padding:1.5rem;border-radius:10px;flex:1;min-width:340px;border:1px solid var(--border)}
+    label{display:block;margin:.9rem 0 .35rem;font-weight:600}
+    input[type="text"],input[type="number"],input[type="file"],input[type="datetime-local"],textarea{
+      width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text)
+
+    }
+    input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(13,110,253,.25)}
+    button, input[type="submit"]{
+      background:var(--accent);color:#fff;border:0;border-radius:6px;padding:9px 14px;cursor:pointer
+    }
+    .btn-secondary{background:var(--accent)}
+    .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+    button:hover, input[type="submit"]:hover{filter:brightness(1.08)}
+    table{width:100%;border-collapse:collapse;margin:.75rem 0 1rem}
+    th,td{border:1px solid var(--border);padding:8px;vertical-align:top}
+    th{background:var(--surface);text-align:left}
+    img{margin-top:.5rem;border-radius:6px;max-width:100%;background:var(--surface);border:1px solid var(--border)}
+    pre{background:var(--surface);color:var(--muted);padding:1rem;border-radius:6px;border:1px solid var(--border);overflow:auto}
+    .row-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+    .inline-note{color:var(--muted);font-size:.9rem;margin:.25rem 0 .75rem}
+    .spacer{height:8px}
+  </style>
+</head>
+<body>
+
+<div>
+
+
+<!-- Centered container (optional) -->
+<div class="center">
+  <!-- SVG as the button -->
+  <a href="/" class="svg-btn" aria-label="Go to Listinator page">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -10 315 58" id="gh-logo" aria-labelledby="ebayLogoTitle" role="img">
+  <title id="ebayLogoTitle">eBay Home + listinator</title>
+  <!-- eBay logo (unchanged) -->
+  <g>
+    <path fill="#F02D2D" d="M24.355 22.759c-.269-5.738-4.412-7.838-8.826-7.813-4.756.026-8.544 2.459-9.183 7.915zM6.234 26.93c.364 5.553 4.208 8.814 9.476 8.785 3.648-.021 6.885-1.524 7.952-4.763l6.306-.035c-1.187 6.568-8.151 8.834-14.145 8.866C4.911 39.844.043 33.865-.002 25.759c-.05-8.927 4.917-14.822 15.765-14.884 8.628-.048 14.978 4.433 15.033 14.291l.01 1.625z"></path>
+    <path fill="#0968F6" d="M46.544 35.429c5.688-.032 9.543-4.148 9.508-10.32s-3.947-10.246-9.622-10.214-9.543 4.148-9.509 10.32 3.974 10.245 9.623 10.214zM30.652.029l6.116-.034.085 15.369c2.978-3.588 7.1-4.65 11.167-4.674 6.817-.037 14.412 4.518 14.468 14.454.045 8.29-5.941 14.407-14.422 14.454-4.463.026-8.624-1.545-11.218-4.681a33.237 33.237 0 01-.19 3.731l-5.994.034c.09-1.915.185-4.364.174-6.322z"></path>
+    <path fill="#FFBD14" d="M77.282 25.724c-5.548.216-8.985 1.229-8.965 4.883.013 2.365 1.94 4.919 6.7 4.891 6.415-.035 9.826-3.556 9.794-9.289v-.637c-2.252.02-5.039.054-7.529.152zm13.683 7.506c.01 1.778.071 3.538.232 5.1l-5.688.032a33.381 33.381 0 01-.225-3.825c-3.052 3.8-6.708 4.909-11.783 4.938-7.532.042-11.585-3.915-11.611-8.518-.037-6.665 5.434-9.049 14.954-9.318 2.6-.072 5.529-.1 7.945-.116v-.637c-.026-4.463-2.9-6.285-7.854-6.257-3.68.021-6.368 1.561-6.653 4.2l-6.434.035c.645-6.566 7.53-8.269 13.595-8.3 7.263-.04 13.406 2.508 13.448 10.192z"></path>
+    <path fill="#92C821" d="M91.939 19.852l-4.5-8.362 7.154-.04 10.589 20.922 10.328-21.02 6.486-.048-18.707 37.251-6.85.039 5.382-10.348-9.887-18.393"></path>
+  </g>
+
+  <!-- LISTINATOR wordmark aligned to logo baseline -->
+  <style>
+    .wordmark {
+      font-family: "eBay Market Sans","Univers","Helvetica Neue",Arial,sans-serif;
+      font-weight: 500;
+      letter-spacing: -3px;   /* tighten slightly; adjust to taste */
+    }
+  </style>
+
+  <!-- Position to the right of the 122-wide logo.
+       Baseline ~39 matches the logo’s visual baseline. -->
+  <text x="120" y="39" class="wordmark" font-size="54" fill="#000">listinator</text>
+</svg>
+
+  </a>
+</div>
+
+<style>
+  .left {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+  }
+
+  /* Make the SVG act like a button */
+  .svg-btn {
+    display: inline-block;
+    line-height: 0;            /* removes inline gap */
+    text-decoration: none;     /* no underline */
+    border-radius: 8px;        /* button-like feel */
+    padding: 6px 10px;
+    transition: transform .06s ease, box-shadow .12s ease;
+    outline: none;
+  }
+
+  .svg-btn:focus-visible {
+    box-shadow: 0 0 0 3px #000;   /* keyboard focus ring */
+  }
+  /* Optional: control size of the SVG button */
+  .svg-btn svg {
+    height: 48px;               /* scale as needed */
+    width: auto;
+    display: block;
+  }
+  .svg-btn { cursor: pointer; }
+</style>
+
+
+
+
+
+</div>
+
+
+<div class="container">
+
+  <!-- LEFT: main form -->
+  <div class="panel" id="left-panel">
+    <h2>eBayLive Listing Generator</h2>
+
+    <form method="post" action="/generate" id="main-form">
+      <!-- ===== SHOW TEMPLATES ===== -->
+      <div style="background:#f0f4ff;border:1px solid #b0c4f0;border-radius:8px;padding:12px 14px;margin-bottom:1rem">
+        <b>Show Templates</b>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
+          <select id="templateSelect" style="flex:1;min-width:160px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text)">
+            <option value="">-- Select a saved show --</option>
+          </select>
+          <button type="button" id="loadTemplateBtn" class="btn-ghost">Load</button>
+          <button type="button" id="deleteTemplateBtn" class="btn-ghost" style="color:#c00">Delete</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
+          <input type="text" id="templateNameInput" placeholder="Template name (e.g. Silver Show June)" style="flex:1;min-width:160px">
+          <button type="button" id="saveTemplateBtn">Save as Template</button>
+        </div>
+        <div id="templateMsg" style="font-size:.85rem;margin-top:6px;color:green;min-height:1.2em"></div>
+      </div>
+      <!-- ===== /SHOW TEMPLATES ===== -->
+
+      <label><b>Global Listing Settings: ALL ARE REQUIRED</b></label>
+
+      <label>Short Title (SHORT TITLE FOR LISTING NAME):</label>
+      <input type="text" name="shortTitle" required>
+
+      <label>Full Title (FOR LISTING DESCRIPTION):</label>
+      <input type="text" name="fullTitle" required>
+
+      <label>Photo URL (DOWNLOAD LINK TO THUMBNAIL):</label>
+      <input type="text" id="photoURL" name="photoURL" required>
+      <div class="inline-note">Preview updates live from the URL above.</div>
+      <label>THUMBNAIL PREVIEW:</label>
+      <img id="preview" src="" alt="Image Preview" style="display:none;">
+
+      <label>Listing Type:</label>
+      <select name="listingType" id="listingType" required style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text)">
+        <option value="0">Coins</option>
+        <option value="1">Bullion</option>
+        <option value="2">Jewelry</option>
+        <option value="3">Cards</option>
+      </select>
+
+      <label>Shipping:</label>
+      <select name="SHIPPING" id="SHIPPING" required style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text)">
+        <option value="0">Free Shipping</option>
+        <option value="1">$2.49 per item</option>
+      </select>
+
+      <label>Start Time (local):</label>
+      <input type="datetime-local" id="dt" step="1">
+      <div class="row-actions">
+        <input type="text" id="dtDisplay" readonly placeholder="YYYY-MM-DD HH:MM:SS" style="max-width:260px">
+        <input type="hidden" name="startTime" id="startTime">
+        <button class="btn-ghost" type="button" id="nowBtn">Now</button>
+        <button class="btn-ghost" type="button" id="clearBtn">Clear</button>
+      </div>
+
+      <div class="spacer"></div>
+      <label><b>INDIVIDUAL LISTING GROUPS (* ARE REQUIRED):</b></label>
+
+      <!-- Example (display-only) -->
+      <table aria-label="Example rows">
+        <thead>
+          <tr>
+            <th>Custom Label SKU</th>
+            <th>*Item SKU</th>
+            <th>*Prices</th>
+            <th>*Starting SKU</th>
+            <th>*Number of Listings</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>10a</td><td>AAA</td><td>19</td><td>1</td><td>40</td></tr>
+          <tr><td>20b</td><td>AAA</td><td>210</td><td>41</td><td>80</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Editable grid sent to backend -->
+      <table id="input-grid" aria-label="Input grid">
+        <thead>
+          <tr>
+            <th>Item SKU</th>
+            <th>*Custom Label SKU</th>
+            <th>*Prices</th>
+            <th>*Starting SKU</th>
+            <th>*Number of Listings</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="text" name="itemSKU"></td>
+            <td><input type="text" name="customLabelSKU" required></td>
+            <td><input type="text" name="prices" required></td>
+            <td><input type="number" name="startingSKU" required></td>
+            <td><input type="number" name="numberOfListings" required></td>
+            <td><button type="button" class="btn-secondary" onclick="removeRow(this)">Remove</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="row-actions">
+        <button type="button" onclick="addRow()">Add Row</button>
+        <input type="submit" value="Generate CSV">
+      </div>
+    </form>
+  </div>
+
+  <!-- RIGHT: CSV upload → extract → copy (client-side) -->
+  <div class="panel" id="right-panel">
+    <h2>Extract ListingIDs from eBay Results (Upload CSV)</h2>
+
+    <label for="csv-file">Upload CSV file:</label>
+    <input type="file" id="csv-file" accept=".csv" />
+
+    <div class="row-actions" style="margin-top:.6rem">
+      <button id="extract-upload-btn" type="button">Extract IDs</button>
+      <button id="copy-btn" class="btn-ghost" type="button">Copy IDs</button>
+      <span class="inline-note">Looks for columns like “Listing ID”, “ListingID”, or “Item ID”.</span>
+    </div>
+
+    <h3>Listing Ids</h3>
+    <textarea id="extract-result" readonly style="height:300px"></textarea>
+  </div>
+
+</div>
+
+<div style="padding:2rem;">
+  <h3>Log Output</h3>
+  <pre id="log-output"></pre>
+</div>
+
+<script>
+/* ----------------- Row handlers ----------------- */
+function addRow() {
+  var tbody = document.querySelector('#input-grid tbody');
+  var newRow = tbody.rows[0].cloneNode(true);
+  var inputs = newRow.querySelectorAll('input');
+  for (var i=0;i<inputs.length;i++) inputs[i].value = '';
+  tbody.appendChild(newRow);
+}
+function removeRow(btn) {
+  var tbody = document.querySelector('#input-grid tbody');
+  if (tbody.rows.length > 1) btn.closest('tr').remove();
+  else alert('At least one row is required.');
+}
+
+/* ----------------- Image preview ----------------- */
+function updateImage() {
+  var url = document.getElementById('photoURL').value.trim();
+  var img = document.getElementById('preview');
+  if (url) { img.src = url; img.style.display = 'block'; }
+  else { img.removeAttribute('src'); img.style.display = 'none'; }
+}
+document.getElementById('photoURL').addEventListener('input', updateImage);
+
+/* ----------------- Log helper ----------------- */
+function logMessage(message) {
+  var logBox = document.getElementById('log-output');
+  logBox.textContent += message + '\n';
+  logBox.scrollTop = logBox.scrollHeight;
+}
+
+/* ----------------- Date/time (minimal & robust) ----------------- */
+function pad2(n){ return (''+n).padStart(2,'0'); }
+function toDatetimeLocalValue(d){
+  return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+'T'
+       + pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds());
+}
+function dtLocalToSQL(v){
+  // v is "YYYY-MM-DDTHH:MM" or "YYYY-MM-DDTHH:MM:SS"
+  if (!v) return '';
+  var T = v.indexOf('T');
+  if (T === -1) return '';
+  var date = v.slice(0, T);
+  var time = v.slice(T+1);
+  var parts = time.split(':');
+  if (parts.length < 2) return '';
+  var hh = pad2(parts[0] || '0');
+  var mm = pad2(parts[1] || '0');
+  var ss = pad2(parts[2] || '0'); // default seconds to 00 if missing
+  return date + ' ' + hh + ':' + mm + ':' + ss;
+}
+function syncStartTime(){
+  var dtEl = document.getElementById('dt');
+  var out  = document.getElementById('dtDisplay');
+  var hid  = document.getElementById('startTime');
+  if (!dtEl || !out || !hid) return;
+  var sql = dtLocalToSQL(dtEl.value);
+  out.value = sql;
+  hid.value = sql;
+}
+(function initStartTime(){
+  var dt = document.getElementById('dt');
+  var form = document.getElementById('main-form');
+  var nowBtn = document.getElementById('nowBtn');
+  var clearBtn = document.getElementById('clearBtn');
+
+  if (dt){
+    dt.addEventListener('input',  syncStartTime);
+    dt.addEventListener('change', syncStartTime);
+  }
+  if (nowBtn){
+    nowBtn.addEventListener('click', function(){
+      dt.value = toDatetimeLocalValue(new Date());
+      syncStartTime();
+    });
+  }
+  if (clearBtn){
+    clearBtn.addEventListener('click', function(){
+      dt.value = '';
+      syncStartTime();
+    });
+  }
+  if (form){
+    form.addEventListener('submit', syncStartTime);
+  }
+  // Initialize once
+  syncStartTime();
+})();
+
+/* ----------------- CSV upload → Extract IDs (client-side) ----------------- */
+function parseCSV(text){
+  var rows = [], row = [], field = '', inQuotes = false;
+  for (var i=0; i<text.length; i++){
+    var c = text[i], n = text[i+1];
+    if (inQuotes){
+      if (c === '"' && n === '"'){ field += '"'; i++; }
+      else if (c === '"'){ inQuotes = false; }
+      else { field += c; }
+    } else {
+      if (c === '"'){ inQuotes = true; }
+      else if (c === ','){ row.push(field); field=''; }
+      else if (c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else if (c === '\r'){ /* ignore CR */ }
+      else { field += c; }
+    }
+  }
+  if (field.length || inQuotes) row.push(field);
+  if (row.length) rows.push(row);
+  return rows;
+}
+function findIdColumn(headers){
+  var candidates = ["listing id","listingid","item id","itemid","id"];
+  function norm(s){ return (s||'').trim().toLowerCase(); }
+  for (var i=0;i<headers.length;i++){
+    var h = norm(headers[i]);
+    if (candidates.indexOf(h) !== -1) return i;
+    if (h.indexOf('listing') !== -1 && h.indexOf('id') !== -1) return i; // fuzzy
+  }
+  return -1;
+}
+
+var uploadedCSVText = '';
+document.getElementById('csv-file').addEventListener('change', function(e){
+  var file = e.target.files && e.target.files[0];
+  var out = document.getElementById('extract-result');
+  if (!file){ out.value = 'No file selected.'; return; }
+  var reader = new FileReader();
+  reader.onload = function(){
+    uploadedCSVText = String(reader.result || '');
+    out.value = '(Loaded '+file.name+', size '+file.size.toLocaleString()+' bytes.)\nClick "Extract IDs".';
+  };
+  reader.onerror = function(){ uploadedCSVText = ''; out.value = 'Failed to read file.'; };
+  reader.readAsText(file);
+});
+
+document.getElementById('extract-upload-btn').addEventListener('click', function(){
+  var out = document.getElementById('extract-result');
+  if (!uploadedCSVText){ out.value = 'Please choose a CSV file first.'; return; }
+
+  var rows = parseCSV(uploadedCSVText);
+  if (!rows.length){ out.value = 'Could not read CSV.'; return; }
+
+  var headers = rows[0];
+  var col = findIdColumn(headers);
+  if (col === -1){
+    out.value = 'Could not find a “Listing ID” column. Looked for: Listing ID, ListingID, Item ID.';
+    return;
+  }
+
+  var ids = [];
+  for (var r=1; r<rows.length; r++){
+    if (rows[r] && rows[r].length > col){
+      var v = (rows[r][col]||'').trim();
+      if (v) ids.push(v);
+    }
+  }
+  out.value = ids.join('\n') || '(No IDs found in that column.)';
+});
+
+/* ===== SHOW TEMPLATES (localStorage) =====
+   Saves: shortTitle, fullTitle, photoURL, listingType, SHIPPING
+   Does NOT save: itemSKU rows, startTime (those are per-show)
+*/
+(function(){
+  var STORE_KEY = 'ebayListinatorTemplates';
+
+  function loadStore(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'{}'); }catch(e){ return {}; } }
+  function saveStore(obj){ localStorage.setItem(STORE_KEY, JSON.stringify(obj)); }
+
+  function refreshDropdown(){
+    var sel = document.getElementById('templateSelect');
+    var current = sel.value;
+    var store = loadStore();
+    sel.innerHTML = '<option value="">-- Select a saved show --</option>';
+    Object.keys(store).sort().forEach(function(name){
+      var opt = document.createElement('option');
+      opt.value = name; opt.textContent = name;
+      if(name === current) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+
+  function setMsg(txt, color){
+    var el = document.getElementById('templateMsg');
+    el.textContent = txt;
+    el.style.color = color || 'green';
+    setTimeout(function(){ if(el.textContent===txt) el.textContent=''; }, 3000);
+  }
+
+  function getFormValues(){
+    var rows = [];
+    document.querySelectorAll('#input-grid tbody tr').forEach(function(tr){
+      var inputs = tr.querySelectorAll('input');
+      rows.push({
+        customLabelSKU:   inputs[1] ? inputs[1].value : '',
+        prices:           inputs[2] ? inputs[2].value : '',
+        startingSKU:      inputs[3] ? inputs[3].value : '',
+        numberOfListings: inputs[4] ? inputs[4].value : ''
+      });
+    });
+    return {
+      shortTitle:  (document.querySelector('[name=shortTitle]')||{}).value || '',
+      fullTitle:   (document.querySelector('[name=fullTitle]')||{}).value  || '',
+      photoURL:    (document.getElementById('photoURL')||{}).value        || '',
+      listingType: (document.getElementById('listingType')||{}).value     || '0',
+      SHIPPING:    (document.getElementById('SHIPPING')||{}).value        || '0',
+      rows: rows
+    };
+  }
+
+  function applyTemplate(data){
+    if(!data) return;
+    var f;
+    f = document.querySelector('[name=shortTitle]'); if(f) f.value = data.shortTitle||'';
+    f = document.querySelector('[name=fullTitle]');  if(f) f.value = data.fullTitle||'';
+    f = document.getElementById('photoURL');         if(f){ f.value = data.photoURL||''; updateImage(); }
+    f = document.getElementById('listingType');      if(f) f.value = data.listingType||'0';
+    f = document.getElementById('SHIPPING');         if(f) f.value = data.SHIPPING||'0';
+    if(data.rows && data.rows.length){
+      var tbody = document.querySelector('#input-grid tbody');
+      while(tbody.rows.length > 1) tbody.deleteRow(1);
+      data.rows.forEach(function(r, i){
+        if(i > 0){
+          var newRow = tbody.rows[0].cloneNode(true);
+          tbody.appendChild(newRow);
+        }
+        var inputs = tbody.rows[i].querySelectorAll('input');
+        if(inputs[0]) inputs[0].value = '';
+        if(inputs[1]) inputs[1].value = r.customLabelSKU || '';
+        if(inputs[2]) inputs[2].value = r.prices || '';
+        if(inputs[3]) inputs[3].value = r.startingSKU || '';
+        if(inputs[4]) inputs[4].value = r.numberOfListings || '';
+      });
+    }
+  }
+
+  document.getElementById('saveTemplateBtn').addEventListener('click', function(){
+    var name = document.getElementById('templateNameInput').value.trim();
+    if(!name){ setMsg('Enter a template name first.', '#c00'); return; }
+    var store = loadStore();
+    store[name] = getFormValues();
+    saveStore(store);
+    refreshDropdown();
+    document.getElementById('templateSelect').value = name;
+    setMsg('Saved "'+name+'"');
+  });
+
+  document.getElementById('loadTemplateBtn').addEventListener('click', function(){
+    var name = document.getElementById('templateSelect').value;
+    if(!name){ setMsg('Select a template to load.', '#c00'); return; }
+    var store = loadStore();
+    if(!store[name]){ setMsg('Template not found.', '#c00'); return; }
+    applyTemplate(store[name]);
+    document.getElementById('templateNameInput').value = name;
+    setMsg('Loaded "'+name+'"');
+  });
+
+  document.getElementById('deleteTemplateBtn').addEventListener('click', function(){
+    var name = document.getElementById('templateSelect').value;
+    if(!name){ setMsg('Select a template to delete.', '#c00'); return; }
+    if(!confirm('Delete template "'+name+'"?')) return;
+    var store = loadStore();
+    delete store[name];
+    saveStore(store);
+    refreshDropdown();
+    setMsg('Deleted "'+name+'"', '#c00');
+  });
+
+  refreshDropdown();
+})();
+/* ===== /SHOW TEMPLATES ===== */
+
+document.getElementById('copy-btn').addEventListener('click', function(){
+  var text = document.getElementById('extract-result').value;
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){ logMessage('IDs copied to clipboard.'); })
+    .catch(function(e){ logMessage('Copy failed: '+e.message); });
+  } else {
+    var ta = document.getElementById('extract-result');
+    ta.select(); document.execCommand('copy'); ta.setSelectionRange(0,0);
+    logMessage('IDs copied to clipboard.');
+  }
+});
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>eBayListinator 3.0</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#FFFFFF; --surface:#FFFFFF; --surface-2:#FFFFFF;
+      --border:#8f8f8f; --accent:#0968f6; --text:#000000; --muted:#FFFFFF;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    h2,h3{color:var(--text);margin-top:0}
+    .container{display:flex;gap:2rem;align-items:flex-start;padding:2rem;flex-wrap:wrap}
+    .panel{background:var(--surface);padding:1.5rem;border-radius:10px;flex:1;min-width:340px;border:1px solid var(--border)}
+    label{display:block;margin:.9rem 0 .35rem;font-weight:600}
+    input[type="text"],input[type="number"],input[type="file"],input[type="datetime-local"],textarea{
+      width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text)
+
+    }
+    input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(13,110,253,.25)}
+    button, input[type="submit"]{
+      background:var(--accent);color:#fff;border:0;border-radius:6px;padding:9px 14px;cursor:pointer
+    }
+    .btn-secondary{background:var(--accent)}
+    .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+    button:hover, input[type="submit"]:hover{filter:brightness(1.08)}
+    table{width:100%;border-collapse:collapse;margin:.75rem 0 1rem}
+    th,td{border:1px solid var(--border);padding:8px;vertical-align:top}
+    th{background:var(--surface);text-align:left}
+    img{margin-top:.5rem;border-radius:6px;max-width:100%;background:var(--surface);border:1px solid var(--border)}
+    pre{background:var(--surface);color:var(--muted);padding:1rem;border-radius:6px;border:1px solid var(--border);overflow:auto}
+    .row-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+    .inline-note{color:var(--muted);font-size:.9rem;margin:.25rem 0 .75rem}
+    .spacer{height:8px}
+  </style>
+</head>
+<body>
+
+<div>
+
+
+<!-- Centered container (optional) -->
+<div class="center">
+  <!-- SVG as the button -->
+  <a href="/" class="svg-btn" aria-label="Go to Listinator page">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -10 315 58" id="gh-logo" aria-labelledby="ebayLogoTitle" role="img">
+  <title id="ebayLogoTitle">eBay Home + listinator</title>
+  <!-- eBay logo (unchanged) -->
+  <g>
+    <path fill="#F02D2D" d="M24.355 22.759c-.269-5.738-4.412-7.838-8.826-7.813-4.756.026-8.544 2.459-9.183 7.915zM6.234 26.93c.364 5.553 4.208 8.814 9.476 8.785 3.648-.021 6.885-1.524 7.952-4.763l6.306-.035c-1.187 6.568-8.151 8.834-14.145 8.866C4.911 39.844.043 33.865-.002 25.759c-.05-8.927 4.917-14.822 15.765-14.884 8.628-.048 14.978 4.433 15.033 14.291l.01 1.625z"></path>
+    <path fill="#0968F6" d="M46.544 35.429c5.688-.032 9.543-4.148 9.508-10.32s-3.947-10.246-9.622-10.214-9.543 4.148-9.509 10.32 3.974 10.245 9.623 10.214zM30.652.029l6.116-.034.085 15.369c2.978-3.588 7.1-4.65 11.167-4.674 6.817-.037 14.412 4.518 14.468 14.454.045 8.29-5.941 14.407-14.422 14.454-4.463.026-8.624-1.545-11.218-4.681a33.237 33.237 0 01-.19 3.731l-5.994.034c.09-1.915.185-4.364.174-6.322z"></path>
+    <path fill="#FFBD14" d="M77.282 25.724c-5.548.216-8.985 1.229-8.965 4.883.013 2.365 1.94 4.919 6.7 4.891 6.415-.035 9.826-3.556 9.794-9.289v-.637c-2.252.02-5.039.054-7.529.152zm13.683 7.506c.01 1.778.071 3.538.232 5.1l-5.688.032a33.381 33.381 0 01-.225-3.825c-3.052 3.8-6.708 4.909-11.783 4.938-7.532.042-11.585-3.915-11.611-8.518-.037-6.665 5.434-9.049 14.954-9.318 2.6-.072 5.529-.1 7.945-.116v-.637c-.026-4.463-2.9-6.285-7.854-6.257-3.68.021-6.368 1.561-6.653 4.2l-6.434.035c.645-6.566 7.53-8.269 13.595-8.3 7.263-.04 13.406 2.508 13.448 10.192z"></path>
+    <path fill="#92C821" d="M91.939 19.852l-4.5-8.362 7.154-.04 10.589 20.922 10.328-21.02 6.486-.048-18.707 37.251-6.85.039 5.382-10.348-9.887-18.393"></path>
+  </g>
+
+  <!-- LISTINATOR wordmark aligned to logo baseline -->
+  <style>
+    .wordmark {
+      font-family: "eBay Market Sans","Univers","Helvetica Neue",Arial,sans-serif;
+      font-weight: 500;
+      letter-spacing: -3px;   /* tighten slightly; adjust to taste */
+    }
+  </style>
+
+  <!-- Position to the right of the 122-wide logo.
+       Baseline ~39 matches the logo’s visual baseline. -->
+  <text x="120" y="39" class="wordmark" font-size="54" fill="#000">listinator</text>
+</svg>
+
+  </a>
+</div>
+
+<style>
+  .left {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+  }
+
+  /* Make the SVG act like a button */
+  .svg-btn {
+    display: inline-block;
+    line-height: 0;            /* removes inline gap */
+    text-decoration: none;     /* no underline */
+    border-radius: 8px;        /* button-like feel */
+    padding: 6px 10px;
+    transition: transform .06s ease, box-shadow .12s ease;
+    outline: none;
+  }
+
+  .svg-btn:focus-visible {
+    box-shadow: 0 0 0 3px #000;   /* keyboard focus ring */
+  }
+  /* Optional: control size of the SVG button */
+  .svg-btn svg {
+    height: 48px;               /* scale as needed */
+    width: auto;
+    display: block;
+  }
+  .svg-btn { cursor: pointer; }
+</style>
+
+
+
+
+
+</div>
+
+
+<div class="container">
+
+  <!-- LEFT: main form -->
+  <div class="panel" id="left-panel">
+    <h2>eBayLive Listing Generator</h2>
+
+    <form method="post" action="/generate" id="main-form">
       <label><b>Global Listing Settings: ALL ARE REQUIRED</b></label>
 
       <label>Short Title (SHORT TITLE FOR LISTING NAME):</label>
