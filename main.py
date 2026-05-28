@@ -210,11 +210,11 @@ def generate_csv(
                         "1", 
                         photoURL, 
                         "3000-Used", 
-                        "Pokemon,
+                        "Pokemon",
                         desc, 
                         "Auction", 
                         "7",
-                        "Marietta, 
+                        "Marietta", 
                         shipping,
                         "No Return Accepted (234360674026) - (ID: 234360674026)",
                         "Auction - (ID: 231040727026)"
