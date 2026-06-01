@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commission Calculator — EbayListinator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222;
+    --border: #2e2e2e;
+    --border2: #3a3a3a;
+    --text: #e8e8e8;
+    --muted: #666;
+    --accent: #c8a96e;
+    --accent2: #e2c98a;
+    --jake: #4a9eff;
+    --hailey: #5ecb8a;
+    --victor: #f07060;
+    --danger: #e05050;
+    --font: 'IBM Plex Sans', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.6; min-height: 100vh; }
+
+  nav { border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; gap: 2rem; height: 52px; background: var(--bg); position: sticky; top: 0; z-index: 100; }
+  .nav-brand { font-family: var(--mono); font-size: 13px; color: var(--accent); text-decoration: none; letter-spacing: 0.04em; }
+  .nav-links { display: flex; gap: 1.5rem; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 13px; transition: color 0.15s; }
+  .nav-links a:hover, .nav-links a.active { color: var(--text); }
+  .nav-links a.active { color: var(--accent); }
+
+  .page { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+  .page-header { margin-bottom: 1.5rem; }
+  .page-header h1 { font-family: var(--mono); font-size: 18px; font-weight: 500; color: var(--accent); letter-spacing: 0.02em; margin-bottom: 4px; }
+  .page-header p { color: var(--muted); font-size: 13px; }
+
+  .rates-bar { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; font-family: var(--mono); color: var(--muted); align-items: center; }
+  .rate-item { display: flex; align-items: center; gap: 6px; }
+  .rate-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  .upload-zone { border: 1px dashed var(--border2); border-radius: 6px; padding: 2.5rem; text-align: center; cursor: pointer; transition: border-color 0.15s, background 0.15s; background: var(--surface); margin-bottom: 1.5rem; }
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: #1e1c18; }
+  .upload-zone .icon { font-size: 24px; margin-bottom: 8px; color: var(--muted); }
+  .upload-zone p { color: var(--muted); font-size: 13px; }
+  .upload-zone strong { color: var(--text); }
+  #fileInput { display: none; }
+
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.25rem; }
+  .metric .label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .metric .value { font-family: var(--mono); font-size: 20px; font-weight: 500; color: var(--accent2); }
+
+  .controls { display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem; flex-wrap: wrap; }
+  .tab { padding: 5px 12px; font-size: 12px; font-family: var(--mono); cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--muted); border-radius: 4px; transition: all 0.12s; letter-spacing: 0.04em; }
+  .tab:hover { border-color: var(--border2); color: var(--text); }
+  .tab.active { border-color: var(--accent); color: var(--accent); background: #1e1c18; }
+  .spacer { flex: 1; }
+  .export-btn { padding: 5px 14px; font-size: 12px; font-family: var(--mono); cursor: pointer; border: 1px solid var(--border2); background: transparent; color: var(--muted); border-radius: 4px; transition: all 0.12s; }
+  .export-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .print-btn { padding: 5px 14px; font-size: 12px; font-family: var(--mono); cursor: pointer; border: 1px solid var(--border2); background: transparent; color: var(--muted); border-radius: 4px; transition: all 0.12s; }
+  .print-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .chip-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .chip { padding: 3px 10px; font-size: 11px; font-family: var(--mono); cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--muted); border-radius: 99px; transition: all 0.12s; }
+  .chip:hover { border-color: var(--border2); color: var(--text); }
+  .chip.active { border-color: var(--accent); color: var(--accent); background: #1e1c18; }
+
+  .table-wrap { border: 1px solid var(--border); border-radius: 6px; overflow: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th { padding: 9px 12px; text-align: left; color: var(--muted); font-family: var(--mono); font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; font-weight: 400; border-bottom: 1px solid var(--border); background: var(--surface); white-space: nowrap; }
+  tbody td { padding: 8px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--surface); }
+  .total-row td { font-family: var(--mono); font-weight: 500; background: var(--surface2); color: var(--accent2); border-top: 1px solid var(--border2); }
+  .num { text-align: right; font-family: var(--mono); }
+  .ref { color: var(--muted); }
+  .payout-col { color: var(--accent2); font-weight: 500; }
+
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 3px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.05em; }
+  .badge-jake   { background: rgba(74,158,255,0.12); color: var(--jake);   border: 1px solid rgba(74,158,255,0.25); }
+  .badge-hailey { background: rgba(94,203,138,0.12); color: var(--hailey); border: 1px solid rgba(94,203,138,0.25); }
+  .badge-victor { background: rgba(240,112,96,0.12); color: var(--victor); border: 1px solid rgba(240,112,96,0.25); }
+  .badge-other  { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+
+  .empty { text-align: center; padding: 4rem 2rem; color: var(--muted); font-size: 13px; font-family: var(--mono); }
+  .error-box { background: rgba(224,80,80,0.1); border: 1px solid rgba(224,80,80,0.3); color: var(--danger); border-radius: 6px; padding: 10px 14px; font-size: 13px; margin-bottom: 1rem; display: none; }
+
+  /* ── Print header (hidden on screen) ── */
+  .print-header { display: none; }
+
+  @media print {
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+    nav, .upload-zone, .controls, .chip-row, .rates-bar,
+    .error-box, .metrics-grid, .page-header { display: none !important; }
+
+    body { background: #fff !important; color: #111 !important; font-size: 11px; }
+    .page { max-width: 100%; padding: 0.5rem 0; margin: 0; }
+
+    .print-header {
+      display: block !important;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid #111;
+    }
+    .print-header h2 { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; color: #111; }
+    .print-header .ph-sub { font-size: 11px; color: #555; margin-top: 2px; }
+    .print-header .ph-meta {
+      display: flex; gap: 2rem; margin-top: 10px;
+      font-size: 10px; color: #555; font-family: 'IBM Plex Mono', monospace;
+    }
+    .print-header .ph-meta span strong { color: #111; font-weight: 600; }
+
+    .table-wrap { border: none !important; overflow: visible !important; border-radius: 0 !important; }
+    table { font-size: 10px; width: 100%; table-layout: fixed; }
+    col.c-date    { width: 8%; }
+    col.c-item    { width: 32%; }
+    col.c-sku     { width: 6%; }
+    col.c-str     { width: 8%; }
+    col.c-gross   { width: 10%; }
+    col.c-buyers  { width: 6%; }
+    col.c-fee     { width: 10%; }
+    col.c-rate    { width: 7%; }
+    col.c-payout  { width: 13%; }
+
+    thead th {
+      background: #1a1a1a !important;
+      color: #f0f0f0 !important;
+      padding: 6px 8px;
+      font-size: 8.5px;
+      letter-spacing: 0.06em;
+      border-bottom: none !important;
+      white-space: normal;
+    }
+    tbody td {
+      padding: 5px 8px;
+      border-bottom: 1px solid #ddd !important;
+      color: #111 !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    tbody tr:nth-child(even) td { background: #f9f9f9 !important; }
+    tbody tr:hover td { background: inherit !important; }
+
+    .total-row td {
+      background: #1a1a1a !important;
+      color: #f0f0f0 !important;
+      font-weight: 700;
+      border-top: none !important;
+      border-bottom: none !important;
+      padding: 6px 8px;
+    }
+
+    .ref { color: #777 !important; }
+    .payout-col { color: #f0f0f0 !important; font-weight: 700; }
+    .num { text-align: right; }
+
+    .badge { font-size: 9px; padding: 1px 5px; }
+    .badge-jake   { background: #ddeeff !important; color: #1a4a99 !important; border-color: #aaccee !important; }
+    .badge-hailey { background: #ddfff0 !important; color: #0d6644 !important; border-color: #aaddcc !important; }
+    .badge-victor { background: #ffeeee !important; color: #993322 !important; border-color: #ffcccc !important; }
+
+    tr { page-break-inside: avoid; }
+    thead { display: table-header-group; }
+    tfoot { display: table-footer-group; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-brand">ebaylistinator</a>
+  <div class="nav-links">
+    <a href="/">listing generator</a>
+    <a href="/commissions" class="active">commissions</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>commission_calculator</h1>
+    <p>Upload your eBay paid-and-shipped export — all calculations run in your browser</p>
+  </div>
+
+  <div class="rates-bar">
+    <span style="color:#444;margin-right:4px">rates //</span>
+    <div class="rate-item"><div class="rate-dot" style="background:var(--jake)"></div>AJSA Jake coins 1.2%</div>
+    <div class="rate-item"><div class="rate-dot" style="background:var(--jake);opacity:0.5"></div>AJSB Jake bullion 0.5%</div>
+    <div class="rate-item"><div class="rate-dot" style="background:var(--hailey)"></div>AHSZ Hailey 2.0%</div>
+    <div class="rate-item"><div class="rate-dot" style="background:var(--victor)"></div>AVHO Victor 5.0%</div>
+    <span style="margin-left:auto;color:#444">combo shows: Hailey 2% of 40% = 0.8% · Victor 5% of 60% = 3%</span>
+  </div>
+
+  <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+    <div class="icon">⬆</div>
+    <p><strong>Drop CSV here</strong> or click to browse</p>
+    <p style="margin-top:4px;font-size:11px;font-family:var(--mono)">eBay paid-and-shipped report · header on row 2</p>
+    <input type="file" id="fileInput" accept=".csv">
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <div id="main" style="display:none">
+    <div class="metrics-grid" id="metricsGrid"></div>
+
+    <div class="controls">
+      <div id="tabs" style="display:flex;gap:4px"></div>
+      <div class="spacer"></div>
+      <button class="export-btn" onclick="exportCSV()">↓ export csv</button>
+      <button class="print-btn" onclick="window.print()">⎙ print</button>
+    </div>
+    <div class="chip-row" id="chips"></div>
+
+    <!-- shown only when printing -->
+    <div class="print-header" id="printHeader">
+      <h2 id="printTitle">Commission Report</h2>
+      <div class="ph-sub" id="printSub"></div>
+      <div class="ph-meta" id="printMeta"></div>
+    </div>
+
+    <div id="tableArea"></div>
+  </div>
+</div>
+
+<script>
+const RATES  = { AJSA:0.012, AJSB:0.005, AHSZ:0.02, AVHO:0.05 };
+const EBAY   = 0.05;
+const NAMES  = { AJSA:'Jake (coins)', AJSB:'Jake (bullion)', AHSZ:'Hailey', AVHO:'Victor', ALL:'All Streamers' };
+const BADGE  = { AJSA:'badge-jake', AJSB:'badge-jake', AHSZ:'badge-hailey', AVHO:'badge-victor' };
+
+let allRows=[], activeTab='AJSA', showFilter='all', allDates=[], fileName='';
+
+/* ── CSV parsing ── */
+function parseCSV(text){
+  const lines = text.split('\n').filter(l=>l.trim());
+  const hi = lines.findIndex(l=>l.includes('Buyer Username')||l.includes('Item Title'));
+  if(hi===-1) throw new Error('Header row not found. Make sure this is an eBay paid-and-shipped report.');
+  const headers = splitLine(lines[hi]).map(h=>h.replace(/"/g,'').trim());
+  return lines.slice(hi+1).map(l=>{
+    const vals=splitLine(l), obj={};
+    headers.forEach((h,j)=>obj[h]=(vals[j]||'').replace(/"/g,'').trim());
+    return obj;
+  }).filter(r=>Object.values(r).some(v=>v));
+}
+function splitLine(line){
+  const res=[]; let cur='',q=false;
+  for(const c of line){ if(c==='"'){q=!q;}else if(c===','&&!q){res.push(cur);cur='';}else cur+=c; }
+  res.push(cur); return res;
+}
+
+/* ── Data processing ── */
+function processData(raw){
+  const cleaned = raw.map(r=>{
+    const title = r['Item Title']||'';
+    if(!title.includes('LIVE ')) return null;
+    const sku = title.substring(0,3).toUpperCase();
+    const cleanTitle = title.split('LIVE ').slice(1).join('LIVE ').trim();
+    const soldFor = parseFloat((r['Sold For']||'0').replace(/[$,]/g,''))||0;
+    const dateRaw = r['Sale Date']||'';
+    const date = dateRaw ? new Date(dateRaw).toLocaleDateString('en-US') : 'Unknown';
+    return { buyer:r['Buyer Username']||'', title:cleanTitle, sku, soldFor, date };
+  }).filter(Boolean);
+
+  const groups={};
+  for(const r of cleaned){
+    const k=`${r.title}|||${r.sku}|||${r.date}`;
+    if(!groups[k]) groups[k]={title:r.title,sku:r.sku,date:r.date,gross:0,buyers:new Set()};
+    groups[k].gross += r.soldFor;
+    groups[k].buyers.add(r.buyer);
+  }
+
+  const result=[];
+  for(const g of Object.values(groups)){
+    const buyers = g.buyers.size;
+    const gross  = g.gross;
+    const ebayFee = gross * EBAY;
+    const commSkus = findCommSkus(g.title);
+    if(!commSkus.length) continue;
+    for(const s of applySplit(commSkus)){
+      result.push({
+        title:g.title, sku:g.sku, date:g.date,
+        gross, buyers, ebayFee,
+        commSku:s.sku, rate:s.rate,
+        payout: gross * s.rate
+      });
+    }
+  }
+  return result;
+}
+
+function findCommSkus(t){ return ['AJSA','AJSB','AHSZ','AVHO'].filter(s=>t.includes(s)); }
+function applySplit(skus){
+  if(skus.includes('AHSZ')&&skus.includes('AVHO')) return [
+    {sku:'AHSZ', rate:0.4*RATES['AHSZ']},  /* Hailey: 2% of 40% = 0.8% */
+    {sku:'AVHO', rate:0.6*RATES['AVHO']},  /* Victor: 5% of 60% = 3%   */
+  ];
+  return skus.map(s=>({sku:s,rate:RATES[s]}));
+}
+
+/* ── Formatting ── */
+const $$ = n=>'$'+(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct = r=>((r||0)*100).toFixed(2)+'%';
+
+/* ── Update print header ── */
+function updatePrintHeader(){
+  const rows = filtered();
+  const seen=new Set(); let tGross=0,tPayout=0,tBuyers=0;
+  for(const r of rows){
+    tPayout+=r.payout;
+    const k=r.title+'|||'+r.sku+'|||'+r.date;
+    if(!seen.has(k)){tGross+=r.gross;tBuyers+=r.buyers;seen.add(k);}
+  }
+  const streamer = NAMES[activeTab]||activeTab;
+  const dateLabel = showFilter==='all' ? 'All Shows' : showFilter;
+  document.getElementById('printTitle').textContent = `Commission Report — ${streamer}`;
+  document.getElementById('printSub').textContent = `${dateLabel} · Generated ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}`;
+  document.getElementById('printMeta').innerHTML = `
+    <span>Gross sold: <strong>${$$(tGross)}</strong></span>
+    <span>Total payout: <strong>${$$(tPayout)}</strong></span>
+    <span>Buyers: <strong>${tBuyers}</strong></span>
+    <span>Rows: <strong>${rows.length}</strong></span>
+    <span>Source: <strong>${fileName}</strong></span>
+  `;
+}
+
+/* ── Render metrics ── */
+function renderMetrics(){
+  const seen=new Set(); let gross=0;
+  for(const r of allRows){ const k=r.title+'|||'+r.sku+'|||'+r.date; if(!seen.has(k)){gross+=r.gross;seen.add(k);} }
+  const totalPayout = allRows.reduce((a,r)=>a+r.payout,0);
+  const shows = new Set(allRows.map(r=>r.date)).size;
+  const items  = new Set(allRows.map(r=>r.title+'|||'+r.date)).size;
+  document.getElementById('metricsGrid').innerHTML=`
+    <div class="metric"><div class="label">gross sold</div><div class="value">${$$(gross)}</div></div>
+    <div class="metric"><div class="label">total commissions</div><div class="value">${$$(totalPayout)}</div></div>
+    <div class="metric"><div class="label">shows</div><div class="value">${shows}</div></div>
+    <div class="metric"><div class="label">line items</div><div class="value">${items}</div></div>
+  `;
+}
+
+/* ── Render tabs ── */
+function renderTabs(){
+  document.getElementById('tabs').innerHTML=['AJSA','AJSB','AHSZ','AVHO','ALL'].map(s=>`
+    <button class="tab${s===activeTab?' active':''}" onclick="switchTab('${s}')">${s==='ALL'?'all':s}</button>
+  `).join('');
+}
+
+/* ── Render date chips ── */
+function renderChips(){
+  document.getElementById('chips').innerHTML=['all',...allDates].map(d=>`
+    <button class="chip${d===showFilter?' active':''}" onclick="filterDate('${d}')">${d==='all'?'all shows':d}</button>
+  `).join('');
+}
+
+/* ── Filtered rows ── */
+function filtered(){
+  return allRows.filter(r=>
+    (activeTab==='ALL'||r.commSku===activeTab)&&
+    (showFilter==='all'||r.date===showFilter)
+  );
+}
+
+/* ── Render table ── */
+function renderTable(){
+  const rows=filtered();
+  if(!rows.length){
+    document.getElementById('tableArea').innerHTML=`<div class="empty">no rows for this selection</div>`;
+    updatePrintHeader();
+    return;
+  }
+  const seen=new Set();
+  let tGross=0,tBuyers=0,tFee=0,tPayout=0;
+  for(const r of rows){
+    tPayout+=r.payout;
+    const k=r.title+'|||'+r.sku+'|||'+r.date;
+    if(!seen.has(k)){tGross+=r.gross;tBuyers+=r.buyers;tFee+=r.ebayFee;seen.add(k);}
+  }
+  const trs=rows.map(r=>`<tr>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${r.date}</td>
+    <td style="overflow:hidden;text-overflow:ellipsis">${r.title}</td>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${r.sku}</td>
+    <td><span class="badge ${BADGE[r.commSku]||'badge-other'}">${r.commSku}</span></td>
+    <td class="num">${$$(r.gross)}</td>
+    <td class="num ref">${r.buyers}</td>
+    <td class="num ref">${$$(r.ebayFee)}</td>
+    <td class="num" style="color:var(--muted)">${pct(r.rate)}</td>
+    <td class="num payout-col">${$$(r.payout)}</td>
+  </tr>`).join('');
+
+  document.getElementById('tableArea').innerHTML=`<div class="table-wrap"><table>
+    <colgroup>
+      <col class="c-date"><col class="c-item"><col class="c-sku"><col class="c-str">
+      <col class="c-gross"><col class="c-buyers"><col class="c-fee">
+      <col class="c-rate"><col class="c-payout">
+    </colgroup>
+    <thead><tr>
+      <th>date</th><th>item</th><th>sku</th><th>streamer</th>
+      <th class="num">gross sales</th>
+      <th class="num">buyers <span style="opacity:.5">(ref)</span></th>
+      <th class="num">ebay fee <span style="opacity:.5">(ref)</span></th>
+      <th class="num">rate</th>
+      <th class="num">commission payout</th>
+    </tr></thead>
+    <tbody>${trs}
+    <tr class="total-row">
+      <td colspan="4">total · ${rows.length} rows</td>
+      <td class="num">${$$(tGross)}</td>
+      <td class="num">${tBuyers}</td>
+      <td class="num">${$$(tFee)}</td>
+      <td></td>
+      <td class="num payout-col">${$$(tPayout)}</td>
+    </tr></tbody>
+  </table></div>`;
+
+  updatePrintHeader();
+}
+
+function switchTab(t){activeTab=t;renderTabs();renderTable();}
+function filterDate(d){showFilter=d;renderChips();renderTable();}
+
+function exportCSV(){
+  const rows=filtered();
+  const h=['Date','Item','SKU','CommSKU','GrossSales','Buyers','eBayFee(ref)','Rate','CommissionPayout'];
+  const lines=[h.join(','),...rows.map(r=>
+    [r.date,`"${r.title}"`,r.sku,r.commSku,r.gross.toFixed(2),r.buyers,r.ebayFee.toFixed(2),r.rate,$$(r.payout)].join(',')
+  )];
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));
+  a.download=`commissions_${activeTab}_${showFilter}.csv`;
+  a.click();
+}
+
+function showError(msg){
+  const el=document.getElementById('errorBox');
+  el.textContent=msg; el.style.display='block';
+  setTimeout(()=>el.style.display='none',7000);
+}
+
+function handleFile(file){
+  fileName = file.name;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      document.getElementById('errorBox').style.display='none';
+      const raw=parseCSV(e.target.result);
+      allRows=processData(raw);
+      if(!allRows.length) throw new Error('No commission rows found. Check that item titles start with "LIVE " and contain a streamer code (AJSA, AJSB, AHSZ, AVHO).');
+      allDates=[...new Set(allRows.map(r=>r.date))].sort();
+      document.getElementById('main').style.display='block';
+      renderMetrics(); renderTabs(); renderChips(); renderTable();
+    }catch(err){showError(err.message);}
+  };
+  r.readAsText(file);
+}
+
+const dz=document.getElementById('dropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});
+document.getElementById('fileInput').addEventListener('change',e=>{if(e.target.files[0])handleFile(e.target.files[0]);});
+</script>
+</body>
+</html>
