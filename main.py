@@ -23,6 +23,10 @@ def home():
 def ebaylive():
     return FileResponse(TPL / "ebaylive.html")
 
+@app.get("/comm")
+async def commissions(request: Request):
+    return templates.TemplateResponse("comm.html", {"request": request})
+
 @app.post("/generate")
 def generate_csv(
     request: Request,
