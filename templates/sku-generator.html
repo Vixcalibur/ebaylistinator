@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SKU Range Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0e0f;
+    --surface: #18181b;
+    --surface2: #222226;
+    --border: #2e2e33;
+    --accent: #00d4a0;
+    --accent-dim: rgba(0,212,160,0.12);
+    --text: #e8e8ea;
+    --text-muted: #6b6b75;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 1rem 4rem;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  header h1 {
+    font-family: var(--mono);
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  header p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+    font-family: var(--mono);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.75rem;
+    width: 100%;
+    max-width: 640px;
+  }
+
+  .fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .field label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .field input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+    font-family: var(--mono);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text);
+    outline: none;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    transition: border-color 0.15s;
+  }
+
+  .field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+
+  .field input.error {
+    border-color: #e05555;
+  }
+
+  .error-msg {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: #e05555;
+    margin-top: 0.35rem;
+    min-height: 1em;
+  }
+
+  .seq-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-generate {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--accent);
+    color: #0a1a15;
+    border: none;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+
+  .btn-generate:hover { opacity: 0.88; }
+  .btn-generate:active { transform: scale(0.99); }
+
+  .results-wrap {
+    width: 100%;
+    max-width: 640px;
+    margin-top: 1.25rem;
+    display: none;
+  }
+
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
+  }
+
+  .results-header span {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+  }
+
+  .results-header strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .btn-action {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.3rem 0.75rem;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text);
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    transition: border-color 0.15s, color 0.15s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-action:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-action.copied { border-color: var(--accent); color: var(--accent); }
+
+  .header-line {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 0.55rem 1.1rem;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    background: var(--surface2);
+  }
+
+  .output-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0 0 8px 8px;
+    padding: 1rem 1.1rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text);
+    line-height: 1.85;
+    max-height: 380px;
+    overflow-y: auto;
+    white-space: pre;
+    letter-spacing: 0.03em;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .output-box::-webkit-scrollbar { width: 6px; }
+  .output-box::-webkit-scrollbar-track { background: transparent; }
+  .output-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SKU Range Generator</h1>
+  <p>Generates sequential SKUs between two endpoints</p>
+</header>
+
+<div class="card">
+  <div class="fields">
+    <div class="field">
+      <label>Start SKU</label>
+      <input type="text" id="startSku" value="AAA" maxlength="3" placeholder="AAA" />
+      <div class="error-msg" id="startErr"></div>
+    </div>
+    <div class="field">
+      <label>End SKU</label>
+      <input type="text" id="endSku" value="AAB" maxlength="3" placeholder="AAB" />
+      <div class="error-msg" id="endErr"></div>
+    </div>
+  </div>
+
+  <div class="seq-row">
+    <div class="field">
+      <label>Seq Start</label>
+      <input type="text" id="seqStart" value="1" placeholder="1" />
+    </div>
+    <div class="field">
+      <label>Seq End</label>
+      <input type="text" id="seqEnd" value="280" placeholder="280" />
+    </div>
+  </div>
+
+  <button class="btn-generate" onclick="generate()">Generate List</button>
+</div>
+
+<div class="results-wrap" id="resultsWrap">
+  <div class="results-header">
+    <span>Generated <strong id="countLabel">0</strong> SKUs</span>
+    <div style="display:flex;gap:0.5rem;">
+      <button class="btn-action" id="copyBtn" onclick="copyAll()">Copy all</button>
+      <a class="btn-action" id="downloadBtn" href="#" onclick="downloadTxt(event)">Download .txt</a>
+    </div>
+  </div>
+  <div class="header-line" id="headerLine"></div>
+  <div class="output-box" id="output"></div>
+</div>
+
+<script>
+  let lastStartVal = 'AAA', lastEndVal = 'AAB';
+
+  function skuToIndex(sku) {
+    const s = sku.toUpperCase();
+    if (!/^[A-Z]{3}$/.test(s)) return null;
+    const a = s.charCodeAt(0) - 65;
+    const b = s.charCodeAt(1) - 65;
+    const c = s.charCodeAt(2) - 65;
+    return a * 676 + b * 26 + c;
+  }
+
+  function indexToSku(n) {
+    const a = Math.floor(n / 676);
+    const b = Math.floor((n % 676) / 26);
+    const c = n % 26;
+    return String.fromCharCode(65+a, 65+b, 65+c);
+  }
+
+  function generate() {
+    const startVal = document.getElementById('startSku').value.trim().toUpperCase();
+    const endVal   = document.getElementById('endSku').value.trim().toUpperCase();
+    const seqStart = parseInt(document.getElementById('seqStart').value) || 1;
+    const seqEnd   = parseInt(document.getElementById('seqEnd').value) || 280;
+
+    document.getElementById('startErr').textContent = '';
+    document.getElementById('endErr').textContent = '';
+    document.getElementById('startSku').classList.remove('error');
+    document.getElementById('endSku').classList.remove('error');
+
+    let ok = true;
+    if (!/^[A-Z]{3}$/.test(startVal)) {
+      document.getElementById('startErr').textContent = 'Must be 3 letters (A-Z)';
+      document.getElementById('startSku').classList.add('error');
+      ok = false;
+    }
+    if (!/^[A-Z]{3}$/.test(endVal)) {
+      document.getElementById('endErr').textContent = 'Must be 3 letters (A-Z)';
+      document.getElementById('endSku').classList.add('error');
+      ok = false;
+    }
+    if (!ok) return;
+
+    const startIdx = skuToIndex(startVal);
+    const endIdx   = skuToIndex(endVal);
+
+    if (endIdx < startIdx) {
+      document.getElementById('endErr').textContent = 'End must be >= Start';
+      document.getElementById('endSku').classList.add('error');
+      return;
+    }
+
+    lastStartVal = startVal;
+    lastEndVal = endVal;
+
+    const pad = String(seqEnd).length;
+    const lines = [];
+    for (let i = startIdx; i <= endIdx; i++) {
+      const prefix = indexToSku(i);
+      for (let n = seqStart; n <= seqEnd; n++) {
+        lines.push(prefix + ' ' + String(n).padStart(pad, '0'));
+      }
+    }
+
+    document.getElementById('headerLine').textContent = startVal + ' - ' + endVal;
+    document.getElementById('countLabel').textContent = lines.length.toLocaleString();
+    document.getElementById('output').textContent = lines.join('\n');
+    document.getElementById('resultsWrap').style.display = 'block';
+
+    const copyBtn = document.getElementById('copyBtn');
+    copyBtn.textContent = 'Copy all';
+    copyBtn.classList.remove('copied');
+  }
+
+  function fullText() {
+    const header = document.getElementById('headerLine').textContent;
+    const body = document.getElementById('output').textContent;
+    return header + '\n' + body;
+  }
+
+  function copyAll() {
+    navigator.clipboard.writeText(fullText()).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy all'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function downloadTxt(e) {
+    e.preventDefault();
+    const blob = new Blob([fullText()], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = lastStartVal + '-' + lastEndVal + '.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('startSku').addEventListener('input', function() {
+    this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
+  });
+  document.getElementById('endSku').addEventListener('input', function() {
+    this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
+  });
+</script>
+
+</body>
+</html>
