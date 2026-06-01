@@ -118,24 +118,124 @@
     <h2>eBayLive Listing Generator</h2>
 
     <form method="post" action="/generate" id="main-form">
-      <!-- ===== SHOW TEMPLATES ===== -->
-      <div style="background:#f0f4ff;border:1px solid #b0c4f0;border-radius:8px;padding:12px 14px;margin-bottom:1rem">
-        <b>Show Templates</b>
-        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
-          <select id="templateSelect" style="flex:1;min-width:160px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text)">
-            <option value="">-- Select a saved show --</option>
-          </select>
-          <button type="button" id="loadTemplateBtn" class="btn-ghost">Load</button>
-          <button type="button" id="deleteTemplateBtn" class="btn-ghost" style="color:#c00">Delete</button>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
-          <input type="text" id="templateNameInput" placeholder="Template name (e.g. Silver Show June)" style="flex:1;min-width:160px">
-          <button type="button" id="saveTemplateBtn">Save as Template</button>
-        </div>
-        <div id="templateMsg" style="font-size:.85rem;margin-top:6px;color:green;min-height:1.2em"></div>
-      </div>
-      <!-- ===== /SHOW TEMPLATES ===== -->
+      /* ===== SHOW TEMPLATES (server-side) ===== */
+      (function(){
+      
+        function setMsg(txt, color){
+          var el = document.getElementById('templateMsg');
+          el.textContent = txt;
+          el.style.color = color || 'green';
+          setTimeout(function(){ if(el.textContent===txt) el.textContent=''; }, 3000);
+        }
+      
+        function refreshDropdown(store){
+          var sel = document.getElementById('templateSelect');
+          var current = sel.value;
+          sel.innerHTML = '<option value="">-- Select a saved show --</option>';
+          Object.keys(store).sort().forEach(function(name){
+            var opt = document.createElement('option');
+            opt.value = name; opt.textContent = name;
+            if(name === current) opt.selected = true;
+            sel.appendChild(opt);
+          });
+        }
+      
+        function fetchTemplates(cb){
+          fetch('/api/templates').then(function(r){ return r.json(); }).then(cb).catch(function(){ cb({}); });
+        }
+      
+        function getFormValues(){
+          var rows = [];
+          document.querySelectorAll('#input-grid tbody tr').forEach(function(tr){
+            var inputs = tr.querySelectorAll('input');
+            rows.push({
+              customLabelSKU:   inputs[1] ? inputs[1].value : '',
+              prices:           inputs[2] ? inputs[2].value : '',
+              startingSKU:      inputs[3] ? inputs[3].value : '',
+              numberOfListings: inputs[4] ? inputs[4].value : ''
+            });
+          });
+          return {
+            shortTitle:  (document.querySelector('[name=shortTitle]')||{}).value || '',
+            fullTitle:   (document.querySelector('[name=fullTitle]')||{}).value  || '',
+            photoURL:    (document.getElementById('photoURL')||{}).value        || '',
+            listingType: (document.getElementById('listingType')||{}).value     || '0',
+            SHIPPING:    (document.getElementById('SHIPPING')||{}).value        || '0',
+            rows: rows
+          };
+        }
+      
+        function applyTemplate(data){
+          if(!data) return;
+          var f;
+          f = document.querySelector('[name=shortTitle]'); if(f) f.value = data.shortTitle||'';
+          f = document.querySelector('[name=fullTitle]');  if(f) f.value = data.fullTitle||'';
+          f = document.getElementById('photoURL');         if(f){ f.value = data.photoURL||''; updateImage(); }
+          f = document.getElementById('listingType');      if(f) f.value = data.listingType||'0';
+          f = document.getElementById('SHIPPING');         if(f) f.value = data.SHIPPING||'0';
+          if(data.rows && data.rows.length){
+            var tbody = document.querySelector('#input-grid tbody');
+            while(tbody.rows.length > 1) tbody.deleteRow(1);
+            data.rows.forEach(function(r, i){
+              if(i > 0){
+                var newRow = tbody.rows[0].cloneNode(true);
+                tbody.appendChild(newRow);
+              }
+              var inputs = tbody.rows[i].querySelectorAll('input');
+              if(inputs[0]) inputs[0].value = '';
+              if(inputs[1]) inputs[1].value = r.customLabelSKU || '';
+              if(inputs[2]) inputs[2].value = r.prices || '';
+              if(inputs[3]) inputs[3].value = r.startingSKU || '';
+              if(inputs[4]) inputs[4].value = r.numberOfListings || '';
+            });
+          }
+        }
+      
+        document.getElementById('saveTemplateBtn').addEventListener('click', function(){
+          var name = document.getElementById('templateNameInput').value.trim();
+          if(!name){ setMsg('Enter a template name first.', '#c00'); return; }
+          fetch('/api/templates/' + encodeURIComponent(name), {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(getFormValues())
+          }).then(function(){
+            fetchTemplates(function(store){
+              refreshDropdown(store);
+              document.getElementById('templateSelect').value = name;
+              setMsg('Saved "'+name+'"');
+            });
+          }).catch(function(){ setMsg('Save failed.', '#c00'); });
+        });
+      
+        document.getElementById('loadTemplateBtn').addEventListener('click', function(){
+          var name = document.getElementById('templateSelect').value;
+          if(!name){ setMsg('Select a template to load.', '#c00'); return; }
+          fetchTemplates(function(store){
+            if(!store[name]){ setMsg('Template not found.', '#c00'); return; }
+            applyTemplate(store[name]);
+            document.getElementById('templateNameInput').value = name;
+            setMsg('Loaded "'+name+'"');
+          });
+        });
+      
+        document.getElementById('deleteTemplateBtn').addEventListener('click', function(){
+          var name = document.getElementById('templateSelect').value;
+          if(!name){ setMsg('Select a template to delete.', '#c00'); return; }
+          if(!confirm('Delete template "'+name+'"?')) return;
+          fetch('/api/templates/' + encodeURIComponent(name), { method: 'DELETE' })
+            .then(function(){
+              fetchTemplates(function(store){
+                refreshDropdown(store);
+                setMsg('Deleted "'+name+'"', '#c00');
+              });
+            }).catch(function(){ setMsg('Delete failed.', '#c00'); });
+        });
+      
+        fetchTemplates(refreshDropdown);
+      })();
+      /* ===== /SHOW TEMPLATES ===== */
 
+      
       <label><b>Global Listing Settings: ALL ARE REQUIRED</b></label>
 
       <label>Short Title (SHORT TITLE FOR LISTING NAME):</label>
