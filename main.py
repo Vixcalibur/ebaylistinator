@@ -1,7 +1,8 @@
-from fastapi import FastAPI, Form, Request, UploadFile, File
-from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse
+from fastapi import FastAPI, Form, Request, UploadFile, File, Body
+from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+import json
 import csv, re, io
 from pathlib import Path
 from typing import List
@@ -281,5 +282,38 @@ def generate_sku_list(first_sku: str = Form(...), last_sku: str = Form(...)):
     return PlainTextResponse(file_content, headers={
         "Content-Disposition": f"attachment; filename={title}.txt"
     })
+
+TEMPLATES_FILE = BASE_DIR / "show_templates.json"
+
+def _load_templates():
+    if TEMPLATES_FILE.exists():
+        try:
+            return json.loads(TEMPLATES_FILE.read_text())
+        except Exception:
+            return {}
+    return {}
+
+def _save_templates(data: dict):
+    TEMPLATES_FILE.write_text(json.dumps(data, indent=2))
+
+@app.get("/api/templates")
+def get_templates():
+    return JSONResponse(_load_templates())
+
+@app.post("/api/templates/{name}")
+async def save_template(name: str, request: Request):
+    data = _load_templates()
+    body = await request.json()
+    data[name] = body
+    _save_templates(data)
+    return JSONResponse({"ok": True})
+
+@app.delete("/api/templates/{name}")
+def delete_template(name: str):
+    data = _load_templates()
+    if name in data:
+        del data[name]
+        _save_templates(data)
+    return JSONResponse({"ok": True})
 
 
