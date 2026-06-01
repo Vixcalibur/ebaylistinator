@@ -94,6 +94,24 @@
     <h2>eBayLive Listing Generator</h2>
     <form method="post" action="/generate" id="main-form">
 
+      <!-- ===== SHOW TEMPLATES UI ===== -->
+      <div style="background:#f0f4ff;border:1px solid #b0c4f0;border-radius:8px;padding:12px 14px;margin-bottom:1rem">
+        <b>Show Templates</b>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
+          <select id="templateSelect" style="flex:1;min-width:160px;border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text)">
+            <option value="">-- Select a saved show --</option>
+          </select>
+          <button type="button" id="loadTemplateBtn" class="btn-ghost">Load</button>
+          <button type="button" id="deleteTemplateBtn" class="btn-ghost" style="color:#c00">Delete</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
+          <input type="text" id="templateNameInput" placeholder="Template name (e.g. Silver Show June)" style="flex:1;min-width:160px">
+          <button type="button" id="saveTemplateBtn">Save as Template</button>
+        </div>
+        <div id="templateMsg" style="font-size:.85rem;margin-top:6px;min-height:1.2em"></div>
+      </div>
+      <!-- ===== /SHOW TEMPLATES UI ===== -->
+
       <label><b>Global Listing Settings: ALL ARE REQUIRED</b></label>
       <label>Short Title (SHORT TITLE FOR LISTING NAME):</label>
       <input type="text" name="shortTitle" required>
