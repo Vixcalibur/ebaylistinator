@@ -28,6 +28,10 @@ def ebaylive():
 def commissions():
     return FileResponse(TPL / "comm.html")
 
+@app.get("/sticker_sku_generator")
+def commissions():
+    return FileResponse(TPL / "sku-generator.html")
+
 @app.post("/generate")
 def generate_csv(
     request: Request,
